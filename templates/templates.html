@@ -1,0 +1,707 @@
+{% extends "base.html" %}
+
+{% block title %}Project Templates - Project Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="fas fa-clipboard-list me-2"></i>Project Templates</h1>
+        <p class="text-muted">Create and manage project templates with custom stages and tasks</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+            <i class="fas fa-plus me-1"></i>New Template
+        </button>
+    </div>
+</div>
+
+<!-- Templates Grid -->
+<div class="row">
+    {% if templates %}
+        {% for template in templates %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 template-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <h5 class="card-title">{{ template.name }}</h5>
+                        <div class="d-flex flex-column align-items-end">
+                            {% if template.is_default %}
+                            <span class="badge bg-info mb-2">
+                                <i class="fas fa-star me-1"></i>Default
+                            </span>
+                            {% endif %}
+                            {% if not template.is_default %}
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#" onclick="editTemplate('{{ template.id }}')">
+                                        <i class="fas fa-edit me-2"></i>Edit
+                                    </a></li>
+                                    <li><a class="dropdown-item text-danger" href="#" onclick="deleteTemplate('{{ template.id }}')">
+                                        <i class="fas fa-trash me-2"></i>Delete
+                                    </a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted">{{ template.description or 'No description' }}</p>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-muted mb-2">Stages ({{ template.stages|length }}):</h6>
+                        <div class="stage-list">
+                            {% for stage in template.stages %}
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="fas fa-arrow-right text-primary me-2"></i>
+                                <small class="fw-bold">{{ stage.name }}</small>
+                                <small class="text-muted ms-2">({{ stage.tasks|length }} tasks)</small>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    
+                    <small class="text-muted">
+                        <i class="fas fa-calendar me-1"></i>Created: {{ template.created_at[:10] }}
+                    </small>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <div>
+                        <button class="btn btn-outline-primary btn-sm" onclick="previewTemplate('{{ template.id }}')">
+                            <i class="fas fa-eye me-1"></i>Preview
+                        </button>
+                        <button class="btn btn-primary btn-sm ms-2" onclick="useTemplate('{{ template.id }}')">
+                            <i class="fas fa-rocket me-1"></i>Use Template
+                        </button>
+                    </div>
+                    {% if not template.is_default %}
+                    <div>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="editTemplate('{{ template.id }}')">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm ms-1" onclick="confirmDeleteTemplate('{{ template.id }}', '{{ template.name }}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-clipboard-list fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Templates Yet</h4>
+                <p class="text-muted">Create your first project template to get started!</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createTemplateModal">
+                    <i class="fas fa-plus me-1"></i>Create Template
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Create Template Modal -->
+<div class="modal fade" id="createTemplateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createTemplateForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="templateName" class="form-label">Template Name *</label>
+                        <input type="text" class="form-control" id="templateName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="templateDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="templateDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Stages & Tasks *</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addStage()">
+                                <i class="fas fa-plus me-1"></i>Add Stage
+                            </button>
+                        </div>
+                        <div id="stagesContainer">
+                            <!-- Stages will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Template Modal -->
+<div class="modal fade" id="editTemplateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editTemplateForm">
+                <div class="modal-body">
+                    <input type="hidden" id="editTemplateId">
+                    <div class="mb-3">
+                        <label for="editTemplateName" class="form-label">Template Name *</label>
+                        <input type="text" class="form-control" id="editTemplateName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTemplateDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editTemplateDescription" rows="2"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <label class="form-label mb-0">Stages & Tasks *</label>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="addEditStage()">
+                                <i class="fas fa-plus me-1"></i>Add Stage
+                            </button>
+                        </div>
+                        <div id="editStagesContainer">
+                            <!-- Stages will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Template</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Template Preview Modal -->
+<div class="modal fade" id="previewTemplateModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Template Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="previewTemplateContent">
+                <!-- Preview content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="closePreviewAndUse()">
+                    <i class="fas fa-rocket me-1"></i>Use This Template
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Use Template Modal -->
+<div class="modal fade" id="useTemplateModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create Project from Template</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="useTemplateForm">
+                <div class="modal-body">
+                    <input type="hidden" id="selectedTemplateId">
+                    <div class="mb-3">
+                        <label class="form-label">Using Template:</label>
+                        <div class="form-control bg-light" id="selectedTemplateName"></div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Project Name *</label>
+                        <input type="text" class="form-control" id="projectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDeadline" class="form-label">Deadline (Optional)</label>
+                        <input type="date" class="form-control" id="projectDeadline">
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectCategory" class="form-label">Category (Optional)</label>
+                        <select class="form-control" id="projectCategory">
+                            <option value="">No Category</option>
+                            <!-- Categories will be loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let stageCounter = 0;
+let editStageCounter = 0;
+let currentPreviewTemplateId = null;
+
+// Add initial stage when modal opens
+document.getElementById('createTemplateModal').addEventListener('show.bs.modal', function() {
+    document.getElementById('stagesContainer').innerHTML = '';
+    stageCounter = 0;
+    addStage();
+});
+
+function addStage() {
+    stageCounter++;
+    const stageHtml = `
+        <div class="card mb-3" data-stage-id="${stageCounter}">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Stage ${stageCounter}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeStage(${stageCounter})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <input type="text" class="form-control stage-name" placeholder="Stage name *" required>
+                </div>
+                <div class="mb-2">
+                    <textarea class="form-control stage-description" placeholder="Stage description" rows="1"></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Tasks:</label>
+                    <div class="tasks-container" data-stage="${stageCounter}">
+                        <div class="input-group mb-1">
+                            <input type="text" class="form-control task-name" placeholder="Task name">
+                            <button type="button" class="btn btn-outline-secondary" onclick="addTask(${stageCounter})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('stagesContainer').insertAdjacentHTML('beforeend', stageHtml);
+}
+
+function addEditStage() {
+    editStageCounter++;
+    const stageHtml = `
+        <div class="card mb-3" data-stage-id="${editStageCounter}">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h6 class="mb-0">Stage ${editStageCounter}</h6>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEditStage(${editStageCounter})">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="mb-2">
+                    <input type="text" class="form-control stage-name" placeholder="Stage name *" required>
+                </div>
+                <div class="mb-2">
+                    <textarea class="form-control stage-description" placeholder="Stage description" rows="1"></textarea>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label">Tasks:</label>
+                    <div class="tasks-container" data-stage="${editStageCounter}">
+                        <div class="input-group mb-1">
+                            <input type="text" class="form-control task-name" placeholder="Task name">
+                            <button type="button" class="btn btn-outline-secondary" onclick="addEditTask(${editStageCounter})">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.getElementById('editStagesContainer').insertAdjacentHTML('beforeend', stageHtml);
+}
+
+function removeStage(stageId) {
+    document.querySelector(`[data-stage-id="${stageId}"]`).remove();
+}
+
+function removeEditStage(stageId) {
+    document.querySelector(`#editStagesContainer [data-stage-id="${stageId}"]`).remove();
+}
+
+function addTask(stageId) {
+    const tasksContainer = document.querySelector(`[data-stage="${stageId}"]`);
+    const taskHtml = `
+        <div class="input-group mb-1">
+            <input type="text" class="form-control task-name" placeholder="Task name">
+            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    tasksContainer.insertAdjacentHTML('beforeend', taskHtml);
+}
+
+function addEditTask(stageId) {
+    const tasksContainer = document.querySelector(`#editStagesContainer [data-stage="${stageId}"]`);
+    const taskHtml = `
+        <div class="input-group mb-1">
+            <input type="text" class="form-control task-name" placeholder="Task name">
+            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    `;
+    tasksContainer.insertAdjacentHTML('beforeend', taskHtml);
+}
+
+// Create template form submission
+document.getElementById('createTemplateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('templateName').value;
+    const description = document.getElementById('templateDescription').value;
+    const stages = collectStages('stagesContainer');
+    
+    if (!name || stages.length === 0) {
+        alert('Please provide a template name and at least one stage');
+        return;
+    }
+    
+    try {
+        const response = await fetch('/api/templates', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                stages: stages
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error creating template: ' + error.message);
+    }
+});
+
+// Edit template form submission
+document.getElementById('editTemplateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const templateId = document.getElementById('editTemplateId').value;
+    const name = document.getElementById('editTemplateName').value;
+    const description = document.getElementById('editTemplateDescription').value;
+    const stages = collectStages('editStagesContainer');
+    
+    if (!name || stages.length === 0) {
+        alert('Please provide a template name and at least one stage');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/template/${templateId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                stages: stages
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error updating template: ' + error.message);
+    }
+});
+
+function collectStages(containerId) {
+    const stages = [];
+    const stageCards = document.querySelectorAll(`#${containerId} .card`);
+    
+    stageCards.forEach(card => {
+        const name = card.querySelector('.stage-name').value.trim();
+        const description = card.querySelector('.stage-description').value.trim();
+        const taskInputs = card.querySelectorAll('.task-name');
+        const tasks = [];
+        
+        taskInputs.forEach(input => {
+            if (input.value.trim()) {
+                tasks.push(input.value.trim());
+            }
+        });
+        
+        if (name) {
+            stages.push({
+                name: name,
+                description: description,
+                tasks: tasks
+            });
+        }
+    });
+    
+    return stages;
+}
+
+async function editTemplate(templateId) {
+    try {
+        const response = await fetch(`/api/template/${templateId}`);
+        const template = await response.json();
+        
+        if (response.ok) {
+            document.getElementById('editTemplateId').value = template.id;
+            document.getElementById('editTemplateName').value = template.name;
+            document.getElementById('editTemplateDescription').value = template.description;
+            
+            // Clear and populate stages
+            document.getElementById('editStagesContainer').innerHTML = '';
+            editStageCounter = 0;
+            
+            template.stages.forEach(stage => {
+                addEditStage();
+                const stageCard = document.querySelector(`#editStagesContainer [data-stage-id="${editStageCounter}"]`);
+                stageCard.querySelector('.stage-name').value = stage.name;
+                stageCard.querySelector('.stage-description').value = stage.description || '';
+                
+                // Add tasks
+                const tasksContainer = stageCard.querySelector('.tasks-container');
+                tasksContainer.innerHTML = ''; // Clear default task input
+                
+                stage.tasks.forEach(task => {
+                    const taskHtml = `
+                        <div class="input-group mb-1">
+                            <input type="text" class="form-control task-name" value="${task}" placeholder="Task name">
+                            <button type="button" class="btn btn-outline-danger" onclick="this.parentElement.remove()">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    tasksContainer.insertAdjacentHTML('beforeend', taskHtml);
+                });
+                
+                // Add empty task input at the end
+                addEditTask(editStageCounter);
+            });
+            
+            const modal = new bootstrap.Modal(document.getElementById('editTemplateModal'));
+            modal.show();
+        } else {
+            alert('Error loading template: ' + template.error);
+        }
+    } catch (error) {
+        alert('Error loading template: ' + error.message);
+    }
+}
+
+async function deleteTemplate(templateId) {
+    if (!confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/template/${templateId}`, {
+            method: 'DELETE'
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting template: ' + error.message);
+    }
+}
+
+async function previewTemplate(templateId) {
+    try {
+        const response = await fetch(`/api/template/${templateId}`);
+        const template = await response.json();
+        
+        if (response.ok) {
+            currentPreviewTemplateId = templateId;
+            const previewContent = `
+                <div class="template-preview">
+                    <h5>${template.name}</h5>
+                    <p class="text-muted">${template.description || 'No description'}</p>
+                    <div class="stages-preview">
+                        ${template.stages.map((stage, index) => `
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h6 class="mb-0">${index + 1}. ${stage.name}</h6>
+                                    ${stage.description ? `<small class="text-muted">${stage.description}</small>` : ''}
+                                </div>
+                                <div class="card-body">
+                                    <strong>Tasks (${stage.tasks.length}):</strong>
+                                    <ul class="mb-0">
+                                        ${stage.tasks.map(task => `<li>${task}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('previewTemplateContent').innerHTML = previewContent;
+            const modal = new bootstrap.Modal(document.getElementById('previewTemplateModal'));
+            modal.show();
+        } else {
+            alert('Error loading template: ' + template.error);
+        }
+    } catch (error) {
+        alert('Error loading template: ' + error.message);
+    }
+}
+
+function closePreviewAndUse() {
+    bootstrap.Modal.getInstance(document.getElementById('previewTemplateModal')).hide();
+    useTemplate(currentPreviewTemplateId);
+}
+
+async function useTemplate(templateId) {
+    try {
+        // Load template info
+        const templateResponse = await fetch(`/api/template/${templateId}`);
+        const template = await templateResponse.json();
+        
+        // Load categories
+        const categoriesResponse = await fetch('/api/categories');
+        const categories = await categoriesResponse.json();
+        
+        if (templateResponse.ok && categoriesResponse.ok) {
+            document.getElementById('selectedTemplateId').value = templateId;
+            document.getElementById('selectedTemplateName').textContent = template.name;
+            
+            // Populate categories
+            const categorySelect = document.getElementById('projectCategory');
+            categorySelect.innerHTML = '<option value="">No Category</option>';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                categorySelect.appendChild(option);
+            });
+            
+            const modal = new bootstrap.Modal(document.getElementById('useTemplateModal'));
+            modal.show();
+        } else {
+            alert('Error loading template or categories');
+        }
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+// Use template form submission (create project from template)
+document.getElementById('useTemplateForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const templateId = document.getElementById('selectedTemplateId').value;
+    const name = document.getElementById('projectName').value;
+    const description = document.getElementById('projectDescription').value;
+    const deadline = document.getElementById('projectDeadline').value;
+    const categoryId = document.getElementById('projectCategory').value;
+    
+    try {
+        const response = await fetch('/api/create_project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                deadline: deadline || null,
+                category_id: categoryId || null,
+                template_id: templateId
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            // Redirect to the new project
+            window.location.href = `/project/${result.id}`;
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error creating project: ' + error.message);
+    }
+});
+
+// Template deletion with double confirmation
+async function confirmDeleteTemplate(templateId, templateName) {
+    // First confirmation
+    const firstConfirm = confirm(`Are you sure you want to delete the template "${templateName}"?\n\nThis action cannot be undone and will permanently remove the template and all its stages and tasks.`);
+    
+    if (!firstConfirm) {
+        return;
+    }
+    
+    // Second confirmation - user must type template name
+    const typedName = prompt(`To confirm deletion, please type the template name exactly:\n\n"${templateName}"`);
+    
+    if (typedName !== templateName) {
+        alert('Template name does not match. Deletion cancelled.');
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/template/${templateId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Template deleted successfully.');
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting template: ' + error.message);
+    }
+}
+
+</script>
+{% endblock %}

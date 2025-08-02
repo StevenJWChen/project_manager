@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category.name }} - Project Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('categories') }}">Categories</a></li>
+                <li class="breadcrumb-item active">{{ category.name }}</li>
+            </ol>
+        </nav>
+        <h1>
+            <i class="fas fa-tag me-2" style="color: {{ category.color }}"></i>
+            <span style="color: {{ category.color }}">{{ category.name }}</span>
+        </h1>
+        <p class="text-muted">{{ category.description or 'No description' }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+            <i class="fas fa-plus me-1"></i>New Project in Category
+        </button>
+    </div>
+</div>
+
+<!-- Category Statistics -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center" style="border-left: 4px solid {{ category.color }};">
+            <div class="card-body">
+                <i class="fas fa-folder-open fa-2x mb-2" style="color: {{ category.color }}"></i>
+                <h3 class="card-title">{{ projects|length }}</h3>
+                <p class="card-text text-muted">Total Projects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                <h3 class="card-title">{{ projects|rejectattr('is_completed')|list|length }}</h3>
+                <p class="card-text text-muted">Active Projects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                <h3 class="card-title">{{ projects|selectattr('is_completed')|list|length }}</h3>
+                <p class="card-text text-muted">Completed Projects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-exclamation-triangle fa-2x text-danger mb-2"></i>
+                <h3 class="card-title">{{ projects|selectattr('is_overdue')|list|length }}</h3>
+                <p class="card-text text-muted">Overdue Projects</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Progress Overview -->
+{% if projects %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>Category Progress Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                {% set total_progress = 0 %}
+                {% for project in projects %}
+                    {% set total_progress = total_progress + project.get_overall_progress() %}
+                {% endfor %}
+                {% set avg_progress = (total_progress / projects|length) if projects|length > 0 else 0 %}
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span><strong>Average Progress</strong></span>
+                        <span class="text-muted">{{ "%.1f"|format(avg_progress * 100) }}%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 20px;">
+                        <div class="progress-bar progress-bar-striped" 
+                             style="width: {{ avg_progress * 100 }}%; background-color: {{ category.color }};">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row text-center">
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Total Stages</h6>
+                        <h4>
+                            {% set total_stages = 0 %}
+                            {% for project in projects %}
+                                {% set total_stages = total_stages + project.stages|length %}
+                            {% endfor %}
+                            {{ total_stages }}
+                        </h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Completed Stages</h6>
+                        <h4 class="text-success">
+                            {% set completed_stages = 0 %}
+                            {% for project in projects %}
+                                {% for stage in project.stages %}
+                                    {% if stage.status.value == 'completed' %}
+                                        {% set completed_stages = completed_stages + 1 %}
+                                    {% endif %}
+                                {% endfor %}
+                            {% endfor %}
+                            {{ completed_stages }}
+                        </h4>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-muted">Total Tasks</h6>
+                        <h4>
+                            {% set total_tasks = 0 %}
+                            {% for project in projects %}
+                                {% for stage in project.stages %}
+                                    {% set total_tasks = total_tasks + stage.tasks|length %}
+                                {% endfor %}
+                            {% endfor %}
+                            {{ total_tasks }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Category Info
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Category Color:</strong>
+                    <span class="badge ms-2" style="background-color: {{ category.color }}; color: white;">
+                        {{ category.color }}
+                    </span>
+                </div>
+                <div class="mb-3">
+                    <strong>Created:</strong>
+                    <br><small class="text-muted">{{ category.created_at[:10] }}</small>
+                </div>
+                {% set projects_with_deadlines = projects|selectattr('deadline')|list %}
+                {% if projects_with_deadlines %}
+                <div class="mb-3">
+                    <strong>Upcoming Deadlines:</strong>
+                    {% for project in projects_with_deadlines %}
+                    {% if loop.index <= 3 and project.days_until_deadline() is not none %}
+                    <div class="mt-1">
+                        <small class="{% if project.is_overdue() %}text-danger{% elif project.days_until_deadline() <= 3 %}text-warning{% else %}text-muted{% endif %}">
+                            <i class="fas fa-calendar me-1"></i>
+                            {{ project.name }}: {{ project.days_until_deadline() }} days
+                        </small>
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Projects in Category -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-list me-2"></i>Projects in {{ category.name }}
+                    </h5>
+                    {% if projects|length > 3 %}
+                    <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="collapse" data-bs-target="#projectFilters">
+                        <i class="fas fa-filter me-1"></i>Filters
+                    </button>
+                    {% endif %}
+                </div>
+                {% if projects|length > 3 %}
+                <div class="collapse mt-3" id="projectFilters">
+                    <div class="row align-items-end">
+                        <div class="col-md-6">
+                            <label for="categoryProjectSearch" class="form-label">
+                                <i class="fas fa-search me-1"></i>Search Projects
+                            </label>
+                            <input type="text" class="form-control" id="categoryProjectSearch" placeholder="Search by name or description...">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="categoryStatusFilter" class="form-label">Status</label>
+                            <select class="form-control" id="categoryStatusFilter">
+                                <option value="">All Projects</option>
+                                <option value="active">Active</option>
+                                <option value="completed">Completed</option>
+                                <option value="overdue">Overdue</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="categorySortBy" class="form-label">Sort By</label>
+                            <select class="form-control" id="categorySortBy">
+                                <option value="created_at">Date Created</option>
+                                <option value="name">Project Name</option>
+                                <option value="progress">Progress</option>
+                                <option value="deadline">Deadline</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {% if projects %}
+                <div class="row" id="categoryProjectsContainer">
+                    {% for project in projects %}
+                    <div class="col-md-6 col-lg-4 mb-4 category-project-item" 
+                         data-name="{{ project.name|lower }}" 
+                         data-description="{{ (project.description or '')|lower }}"
+                         data-status="{% if project.is_completed() %}completed{% elif project.is_overdue() %}overdue{% else %}active{% endif %}"
+                         data-progress="{{ project.get_overall_progress() }}"
+                         data-created="{{ project.created_at }}"
+                         data-deadline="{{ project.deadline or '' }}">
+                        <div class="card h-100 project-card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <h5 class="card-title">{{ project.name }}</h5>
+                                    <div class="d-flex flex-column align-items-end">
+                                        <span class="badge bg-{% if project.is_completed() %}success{% else %}primary{% endif %} mb-1">
+                                            {% if project.is_completed() %}
+                                                <i class="fas fa-check me-1"></i>Complete
+                                            {% else %}
+                                                <i class="fas fa-clock me-1"></i>Active
+                                            {% endif %}
+                                        </span>
+                                        {% if project.is_overdue() %}
+                                        <span class="badge bg-danger">
+                                            <i class="fas fa-exclamation me-1"></i>Overdue
+                                        </span>
+                                        {% elif project.days_until_deadline() is not none and project.days_until_deadline() <= 3 and not project.is_completed() %}
+                                        <span class="badge bg-warning">
+                                            <i class="fas fa-clock me-1"></i>Due Soon
+                                        </span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <p class="card-text text-muted">{{ project.description or 'No description' }}</p>
+                                
+                                <div class="mb-3">
+                                    <div class="d-flex justify-content-between mb-1">
+                                        <small class="text-muted">Progress</small>
+                                        <small class="text-muted">{{ "%.1f"|format(project.get_overall_progress() * 100) }}%</small>
+                                    </div>
+                                    <div class="progress" style="height: 8px;">
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ project.get_overall_progress() * 100 }}%; background-color: {{ category.color }};"
+                                             aria-valuenow="{{ project.get_overall_progress() * 100 }}" 
+                                             aria-valuemin="0" aria-valuemax="100"></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row text-center mb-3">
+                                    <div class="col">
+                                        <small class="text-muted d-block">Stages</small>
+                                        <strong>{{ project.stages|length }}</strong>
+                                    </div>
+                                    <div class="col">
+                                        <small class="text-muted d-block">Current</small>
+                                        <strong>
+                                            {% set current_stage = project.get_current_stage() %}
+                                            {% if current_stage %}
+                                                {{ current_stage.name }}
+                                            {% else %}
+                                                Done
+                                            {% endif %}
+                                        </strong>
+                                    </div>
+                                </div>
+                                
+                                {% if project.deadline %}
+                                <div class="mb-2">
+                                    <small class="text-muted d-block">
+                                        <i class="fas fa-calendar me-1"></i>Deadline: 
+                                        {{ project.deadline[:10] }}
+                                        {% if project.days_until_deadline() is not none %}
+                                            ({{ project.days_until_deadline() }} days)
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="card-footer">
+                                <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye me-1"></i>View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                    <h4 class="text-muted">No Projects in This Category</h4>
+                    <p class="text-muted">Create your first project in this category!</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                        <i class="fas fa-plus me-1"></i>Create Project
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Project Modal (for this category) -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Project in {{ category.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createProjectForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Project Name *</label>
+                        <input type="text" class="form-control" id="projectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDeadline" class="form-label">Deadline (Optional)</label>
+                        <input type="date" class="form-control" id="projectDeadline">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category</label>
+                        <div class="form-control d-flex align-items-center" style="border: 2px solid {{ category.color }};">
+                            <i class="fas fa-tag me-2" style="color: {{ category.color }}"></i>
+                            <span style="color: {{ category.color }}">{{ category.name }}</span>
+                        </div>
+                        <small class="text-muted">Project will be created in this category</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Category project filtering and searching functionality
+let allCategoryProjects = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Store all project elements for filtering
+    allCategoryProjects = Array.from(document.querySelectorAll('.category-project-item'));
+    
+    // Add event listeners for search and filters if they exist
+    const searchInput = document.getElementById('categoryProjectSearch');
+    const statusFilter = document.getElementById('categoryStatusFilter');
+    const sortBy = document.getElementById('categorySortBy');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterCategoryProjects);
+        statusFilter.addEventListener('change', filterCategoryProjects);
+        sortBy.addEventListener('change', sortCategoryProjects);
+    }
+});
+
+function filterCategoryProjects() {
+    const searchTerm = document.getElementById('categoryProjectSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('categoryStatusFilter').value;
+    
+    let visibleCount = 0;
+    
+    allCategoryProjects.forEach(project => {
+        let visible = true;
+        
+        // Search filter
+        if (searchTerm) {
+            const name = project.dataset.name;
+            const description = project.dataset.description;
+            if (!name.includes(searchTerm) && !description.includes(searchTerm)) {
+                visible = false;
+            }
+        }
+        
+        // Status filter
+        if (statusFilter && project.dataset.status !== statusFilter) {
+            visible = false;
+        }
+        
+        project.style.display = visible ? 'block' : 'none';
+        if (visible) visibleCount++;
+    });
+    
+    // Show/hide no results message
+    updateCategoryNoResultsMessage(visibleCount);
+    
+    // Re-sort visible projects
+    sortCategoryProjects();
+}
+
+function sortCategoryProjects() {
+    const sortBy = document.getElementById('categorySortBy');
+    if (!sortBy) return;
+    
+    const sortByValue = sortBy.value;
+    const container = document.getElementById('categoryProjectsContainer');
+    
+    const visibleProjects = allCategoryProjects.filter(p => p.style.display !== 'none');
+    
+    visibleProjects.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch (sortByValue) {
+            case 'name':
+                aVal = a.dataset.name;
+                bVal = b.dataset.name;
+                break;
+            case 'progress':
+                aVal = parseFloat(a.dataset.progress);
+                bVal = parseFloat(b.dataset.progress);
+                break;
+            case 'deadline':
+                aVal = a.dataset.deadline || '9999-12-31';
+                bVal = b.dataset.deadline || '9999-12-31';
+                break;
+            default: // created_at
+                aVal = a.dataset.created;
+                bVal = b.dataset.created;
+                break;
+        }
+        
+        // Always sort descending (newest/highest first)
+        return aVal < bVal ? 1 : -1;
+    });
+    
+    // Re-append sorted projects
+    visibleProjects.forEach(project => {
+        container.appendChild(project);
+    });
+}
+
+function updateCategoryNoResultsMessage(visibleCount) {
+    let noResultsMsg = document.getElementById('categoryNoResultsMessage');
+    
+    if (visibleCount === 0 && allCategoryProjects.length > 0) {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'categoryNoResultsMessage';
+            noResultsMsg.className = 'col-12 text-center py-5';
+            noResultsMsg.innerHTML = `
+                <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Projects Found</h4>
+                <p class="text-muted">Try adjusting your search or filter criteria.</p>
+            `;
+            document.getElementById('categoryProjectsContainer').appendChild(noResultsMsg);
+        }
+        noResultsMsg.style.display = 'block';
+    } else if (noResultsMsg) {
+        noResultsMsg.style.display = 'none';
+    }
+}
+
+document.getElementById('createProjectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('projectName').value;
+    const description = document.getElementById('projectDescription').value;
+    const deadline = document.getElementById('projectDeadline').value;
+    
+    try {
+        const response = await fetch('/api/create_project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                deadline: deadline || null,
+                category_id: '{{ category.id }}'
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error creating project: ' + error.message);
+    }
+});
+</script>
+{% endblock %}

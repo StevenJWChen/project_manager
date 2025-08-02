@@ -1,0 +1,1238 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Project Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h1><i class="fas fa-tachometer-alt me-2"></i>Project Dashboard</h1>
+        <p class="text-muted">Manage and monitor your projects</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="btn-group me-2" role="group">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="cardViewBtn" onclick="switchView('card')">
+                <i class="fas fa-th-large"></i>
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="listViewBtn" onclick="switchView('list')">
+                <i class="fas fa-list"></i>
+            </button>
+        </div>
+        <div class="dropdown me-2">
+            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                <i class="fas fa-cog me-1"></i>Data Management
+            </button>
+            <ul class="dropdown-menu">
+                <li><h6 class="dropdown-header">Export Data</h6></li>
+                <li><a class="dropdown-item" href="#" onclick="exportData('projects')">
+                    <i class="fas fa-download me-2"></i>Export Projects
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportData('templates')">
+                    <i class="fas fa-download me-2"></i>Export Templates  
+                </a></li>
+                <li><a class="dropdown-item" href="#" onclick="exportData('all')">
+                    <i class="fas fa-download me-2"></i>Export All Data
+                </a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><h6 class="dropdown-header">Import Data</h6></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal" onclick="setImportType('projects')">
+                    <i class="fas fa-upload me-2"></i>Import Projects
+                </a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal" onclick="setImportType('templates')">
+                    <i class="fas fa-upload me-2"></i>Import Templates
+                </a></li>
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#importModal" onclick="setImportType('all')">
+                    <i class="fas fa-upload me-2"></i>Import All Data
+                </a></li>
+            </ul>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+            <i class="fas fa-plus me-1"></i>New Project
+        </button>
+    </div>
+</div>
+
+<!-- Batch Operations Bar -->
+<div class="row mb-3" id="batchOperationsBar" style="display: none;">
+    <div class="col-12">
+        <div class="card border-info">
+            <div class="card-body py-2">
+                <div class="row align-items-center">
+                    <div class="col-md-4">
+                        <div class="d-flex align-items-center">
+                            <input type="checkbox" class="form-check-input me-2" id="selectAllCheckbox" onchange="toggleSelectAll()">
+                            <label for="selectAllCheckbox" class="form-check-label">
+                                <span id="selectedCount">0</span> projects selected
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-8 text-end">
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-danger btn-sm" onclick="batchDeleteProjects()" id="batchDeleteBtn" disabled>
+                                <i class="fas fa-trash me-1"></i>Delete Selected
+                            </button>
+                            <div class="btn-group" role="group">
+                                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle" data-bs-toggle="dropdown" id="batchMoveBtn" disabled>
+                                    <i class="fas fa-folder me-1"></i>Move to Category
+                                </button>
+                                <ul class="dropdown-menu" id="batchCategoryDropdown">
+                                    {% for category in categories %}
+                                    <li><a class="dropdown-item" href="#" onclick="batchMoveToCategory('{{ category.id }}', '{{ category.name }}')">
+                                        <span class="badge me-2" style="background-color: {{ category.color }};">&nbsp;</span>
+                                        {{ category.name }}
+                                    </a></li>
+                                    {% endfor %}
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="#" onclick="batchMoveToCategory('', 'Uncategorized')">
+                                        <i class="fas fa-times me-2"></i>Remove Category
+                                    </a></li>
+                                </ul>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" onclick="clearSelection()">
+                                <i class="fas fa-times me-1"></i>Clear Selection
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search and Filter Controls -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <div class="row align-items-end">
+                    <div class="col-md-4">
+                        <label for="projectSearch" class="form-label">
+                            <i class="fas fa-search me-1"></i>Search Projects
+                        </label>
+                        <input type="text" class="form-control" id="projectSearch" placeholder="Search by name or description...">
+                    </div>
+                    <div class="col-md-2">
+                        <label for="statusFilter" class="form-label">Status</label>
+                        <select class="form-control" id="statusFilter">
+                            <option value="">All Projects</option>
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="categoryFilter" class="form-label">Category</label>
+                        <select class="form-control" id="categoryFilter">
+                            <option value="">All Categories</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sortBy" class="form-label">Sort By</label>
+                        <select class="form-control" id="sortBy">
+                            <option value="created_at">Date Created</option>
+                            <option value="name">Project Name</option>
+                            <option value="progress">Progress</option>
+                            <option value="deadline">Deadline</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="sortOrder" class="form-label">Order</label>
+                        <select class="form-control" id="sortOrder">
+                            <option value="desc">Newest First</option>
+                            <option value="asc">Oldest First</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Card View -->
+<div class="row" id="projectsContainer">
+    {% if projects %}
+        {% for project in projects %}
+        <div class="col-md-4 col-lg-3 mb-3 project-item" 
+             data-name="{{ project.name|lower }}" 
+             data-description="{{ (project.description or '')|lower }}"
+             data-status="{% if project.is_completed() %}completed{% elif project.is_overdue() %}overdue{% else %}active{% endif %}"
+             data-category="{{ project.category_id or '' }}"
+             data-progress="{{ project.get_overall_progress() }}"
+             data-created="{{ project.created_at }}"
+             data-deadline="{{ project.deadline or '' }}">
+            <div class="card h-100 project-card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-start">
+                            <input type="checkbox" class="form-check-input me-2 project-checkbox" value="{{ project.id }}" onchange="updateBatchOperations()">
+                            <h5 class="card-title mb-0">{{ project.name }}</h5>
+                        </div>
+                        <div class="d-flex flex-column align-items-end">
+                            <span class="badge bg-{% if project.is_completed() %}success{% else %}primary{% endif %} mb-1">
+                                {% if project.is_completed() %}
+                                    <i class="fas fa-check me-1"></i>Complete
+                                {% else %}
+                                    <i class="fas fa-clock me-1"></i>Active
+                                {% endif %}
+                            </span>
+                            {% if project.is_overdue() %}
+                            <span class="badge bg-danger">
+                                <i class="fas fa-exclamation me-1"></i>Overdue
+                            </span>
+                            {% elif project.days_until_deadline() is not none and project.days_until_deadline() <= 3 and not project.is_completed() %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-clock me-1"></i>Due Soon
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <p class="card-text text-muted">{{ project.description or 'No description' }}</p>
+                    
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between mb-1">
+                            <small class="text-muted">Progress</small>
+                            <small class="text-muted">{{ "%.1f"|format(project.get_overall_progress() * 100) }}%</small>
+                        </div>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar" role="progressbar" 
+                                 style="width: {{ project.get_overall_progress() * 100 }}%"
+                                 aria-valuenow="{{ project.get_overall_progress() * 100 }}" 
+                                 aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="row text-center mb-3">
+                        <div class="col">
+                            <small class="text-muted d-block">Stages</small>
+                            <strong>{{ project.stages|length }}</strong>
+                        </div>
+                        <div class="col">
+                            <small class="text-muted d-block">Current</small>
+                            <strong>
+                                {% set current_stage = project.get_current_stage() %}
+                                {% if current_stage %}
+                                    {{ current_stage.name }}
+                                {% else %}
+                                    Done
+                                {% endif %}
+                            </strong>
+                        </div>
+                    </div>
+                    
+                    {% if project.deadline %}
+                    <div class="mb-2">
+                        <small class="text-muted d-block">
+                            <i class="fas fa-calendar me-1"></i>Deadline: 
+                            {{ project.deadline[:10] }}
+                            {% if project.days_until_deadline() is not none %}
+                                ({{ project.days_until_deadline() }} days)
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-eye me-1"></i>View Details
+                    </a>
+                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteProject('{{ project.id }}', '{{ project.name }}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Projects Yet</h4>
+                <p class="text-muted">Create your first project to get started!</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                    <i class="fas fa-plus me-1"></i>Create Project
+                </button>
+            </div>
+        </div>
+    {% endif %}
+</div>
+
+<!-- List View -->
+<div class="d-none" id="projectsListContainer">
+    {% if projects %}
+    <div class="card">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" class="form-check-input" id="selectAllListCheckbox" onchange="toggleSelectAll()">
+                            </th>
+                            <th class="sortable-header" data-sort="name" style="cursor: pointer;">
+                                Project <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="category" style="cursor: pointer;">
+                                Category <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="stage" style="cursor: pointer;">
+                                Current Stage <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="progress" style="cursor: pointer;">
+                                Progress <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="status" style="cursor: pointer;">
+                                Status <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th class="sortable-header" data-sort="deadline" style="cursor: pointer;">
+                                Deadline <i class="fas fa-sort text-muted"></i>
+                            </th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projectsListBody">
+                        {% for project in projects %}
+                        <tr class="project-list-item" 
+                            data-name="{{ project.name|lower }}" 
+                            data-description="{{ (project.description or '')|lower }}"
+                            data-status="{% if project.is_completed() %}completed{% elif project.is_overdue() %}overdue{% else %}active{% endif %}"
+                            data-category="{{ project.category_id or '' }}"
+                            data-category-name="{% if project.category_id %}{% for category in categories %}{% if category.id == project.category_id %}{{ category.name|lower }}{% endif %}{% endfor %}{% else %}uncategorized{% endif %}"
+                            data-stage="{% set current_stage = project.get_current_stage() %}{% if current_stage %}{{ current_stage.name|lower }}{% else %}completed{% endif %}"
+                            data-progress="{{ project.get_overall_progress() }}"
+                            data-created="{{ project.created_at }}"
+                            data-deadline="{{ project.deadline or '' }}">
+                            <td>
+                                <input type="checkbox" class="form-check-input project-checkbox" value="{{ project.id }}" onchange="updateBatchOperations()">
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ project.name }}</strong>
+                                    {% if project.description %}
+                                    <br><small class="text-muted">{{ project.description[:50] }}{% if project.description|length > 50 %}...{% endif %}</small>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td>
+                                {% if project.category_id %}
+                                    {% for category in categories %}
+                                        {% if category.id == project.category_id %}
+                                            <span class="badge bg-secondary">{{ category.name }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% else %}
+                                    <span class="badge bg-light text-dark">Uncategorized</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% set current_stage = project.get_current_stage() %}
+                                {% if current_stage %}
+                                    <span class="badge bg-info">{{ current_stage.name }}</span>
+                                    <br><small class="text-muted">
+                                        {% if current_stage.status.value == 'completed' %}
+                                            <i class="fas fa-check text-success"></i> Completed
+                                        {% elif current_stage.status.value == 'in_progress' %}
+                                            <i class="fas fa-clock text-primary"></i> In Progress
+                                        {% else %}
+                                            <i class="fas fa-circle text-muted"></i> Not Started
+                                        {% endif %}
+                                    </small>
+                                {% else %}
+                                    <span class="badge bg-success">All Stages Complete</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="progress flex-grow-1 me-2" style="height: 6px; min-width: 80px;">
+                                        <div class="progress-bar" style="width: {{ project.get_overall_progress() * 100 }}%"></div>
+                                    </div>
+                                    <small class="text-muted">{{ "%.0f"|format(project.get_overall_progress() * 100) }}%</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge bg-{% if project.is_completed() %}success{% elif project.is_overdue() %}danger{% else %}primary{% endif %}">
+                                    {% if project.is_completed() %}
+                                        <i class="fas fa-check me-1"></i>Complete
+                                    {% elif project.is_overdue() %}
+                                        <i class="fas fa-exclamation me-1"></i>Overdue
+                                    {% else %}
+                                        <i class="fas fa-clock me-1"></i>Active
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                {% if project.deadline %}
+                                    <small class="text-muted">
+                                        {{ project.deadline[:10] }}
+                                        {% if project.days_until_deadline() is not none %}
+                                            <br><span class="{% if project.days_until_deadline() <= 0 %}text-danger{% elif project.days_until_deadline() <= 3 %}text-warning{% endif %}">
+                                                ({{ project.days_until_deadline() }} days)
+                                            </span>
+                                        {% endif %}
+                                    </small>
+                                {% else %}
+                                    <small class="text-muted">No deadline</small>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{{ url_for('project_detail', project_id=project.id) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteProject('{{ project.id }}', '{{ project.name }}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-folder-open fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No Projects Yet</h4>
+            <p class="text-muted">Create your first project to get started!</p>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createProjectModal">
+                <i class="fas fa-plus me-1"></i>Create Project
+            </button>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Create Project Modal -->
+<div class="modal fade" id="createProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="createProjectForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="projectName" class="form-label">Project Name *</label>
+                        <input type="text" class="form-control" id="projectName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="projectDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectDeadline" class="form-label">Deadline (Optional)</label>
+                        <input type="date" class="form-control" id="projectDeadline">
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectTemplate" class="form-label">Template (Optional)</label>
+                        <select class="form-control" id="projectTemplate">
+                            <option value="">Use Default Template</option>
+                            <!-- Templates will be loaded dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="projectCategory" class="form-label">Category (Optional)</label>
+                        <select class="form-control" id="projectCategory">
+                            <option value="">No Category</option>
+                            <!-- Categories will be loaded dynamically -->
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Import Data Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalTitle">Import Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="importForm" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Important:</strong> Import will add data to your existing collection. 
+                        Back up your data by exporting before importing to avoid data loss.
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="importFile" class="form-label">Select JSON file to import *</label>
+                        <input type="file" class="form-control" id="importFile" accept=".json" required>
+                        <div class="form-text">Only JSON files are supported.</div>
+                    </div>
+                    
+                    <div class="mb-3" id="importPreview" style="display: none;">
+                        <label class="form-label">Import Preview:</label>
+                        <div class="bg-light p-3 rounded">
+                            <div id="importPreviewContent"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <input type="hidden" id="importType" value="">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="importSubmitBtn" disabled>
+                        <i class="fas fa-upload me-1"></i>Import Data
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Project filtering and searching functionality
+let allProjects = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Store all project elements for filtering
+    allProjects = Array.from(document.querySelectorAll('.project-item'));
+    
+    // Add event listeners for search and filters
+    document.getElementById('projectSearch').addEventListener('input', filterProjects);
+    document.getElementById('statusFilter').addEventListener('change', filterProjects);
+    document.getElementById('categoryFilter').addEventListener('change', filterProjects);
+    document.getElementById('sortBy').addEventListener('change', sortProjects);
+    document.getElementById('sortOrder').addEventListener('change', sortProjects);
+});
+
+function filterProjects() {
+    const searchTerm = document.getElementById('projectSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    
+    let visibleCount = 0;
+    
+    allProjects.forEach(project => {
+        let visible = true;
+        
+        // Search filter
+        if (searchTerm) {
+            const name = project.dataset.name;
+            const description = project.dataset.description;
+            if (!name.includes(searchTerm) && !description.includes(searchTerm)) {
+                visible = false;
+            }
+        }
+        
+        // Status filter
+        if (statusFilter && project.dataset.status !== statusFilter) {
+            visible = false;
+        }
+        
+        // Category filter
+        if (categoryFilter && project.dataset.category !== categoryFilter) {
+            visible = false;
+        }
+        
+        project.style.display = visible ? 'block' : 'none';
+        if (visible) visibleCount++;
+    });
+    
+    // Show/hide no results message
+    updateNoResultsMessage(visibleCount);
+    
+    // Re-sort visible projects
+    sortProjects();
+}
+
+function sortProjects() {
+    const sortBy = document.getElementById('sortBy').value;
+    const sortOrder = document.getElementById('sortOrder').value;
+    const container = document.getElementById('projectsContainer');
+    
+    const visibleProjects = allProjects.filter(p => p.style.display !== 'none');
+    
+    visibleProjects.sort((a, b) => {
+        let aVal, bVal;
+        
+        switch (sortBy) {
+            case 'name':
+                aVal = a.dataset.name;
+                bVal = b.dataset.name;
+                break;
+            case 'progress':
+                aVal = parseFloat(a.dataset.progress);
+                bVal = parseFloat(b.dataset.progress);
+                break;
+            case 'deadline':
+                aVal = a.dataset.deadline || '9999-12-31';
+                bVal = b.dataset.deadline || '9999-12-31';
+                break;
+            default: // created_at
+                aVal = a.dataset.created;
+                bVal = b.dataset.created;
+                break;
+        }
+        
+        if (sortOrder === 'asc') {
+            return aVal > bVal ? 1 : -1;
+        } else {
+            return aVal < bVal ? 1 : -1;
+        }
+    });
+    
+    // Re-append sorted projects
+    visibleProjects.forEach(project => {
+        container.appendChild(project);
+    });
+}
+
+function updateNoResultsMessage(visibleCount) {
+    let noResultsMsg = document.getElementById('noResultsMessage');
+    
+    if (visibleCount === 0 && allProjects.length > 0) {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.id = 'noResultsMessage';
+            noResultsMsg.className = 'col-12 text-center py-5';
+            noResultsMsg.innerHTML = `
+                <i class="fas fa-search fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Projects Found</h4>
+                <p class="text-muted">Try adjusting your search or filter criteria.</p>
+            `;
+            document.getElementById('projectsContainer').appendChild(noResultsMsg);
+        }
+        noResultsMsg.style.display = 'block';
+    } else if (noResultsMsg) {
+        noResultsMsg.style.display = 'none';
+    }
+}
+
+// Load categories and templates when modal opens
+document.getElementById('createProjectModal').addEventListener('show.bs.modal', async function() {
+    try {
+        // Load categories
+        const categoriesResponse = await fetch('/api/categories');
+        const categories = await categoriesResponse.json();
+        
+        const categorySelect = document.getElementById('projectCategory');
+        categorySelect.innerHTML = '<option value="">No Category</option>';
+        
+        categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+        });
+        
+        // Load templates
+        const templatesResponse = await fetch('/api/templates');
+        const templates = await templatesResponse.json();
+        
+        const templateSelect = document.getElementById('projectTemplate');
+        templateSelect.innerHTML = '<option value="">Use Default Template</option>';
+        
+        templates.forEach(template => {
+            const option = document.createElement('option');
+            option.value = template.id;
+            option.textContent = template.name;
+            templateSelect.appendChild(option);
+        });
+    } catch (error) {
+        console.warn('Failed to load categories or templates:', error);
+    }
+});
+
+document.getElementById('createProjectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('projectName').value;
+    const description = document.getElementById('projectDescription').value;
+    const deadline = document.getElementById('projectDeadline').value;
+    const templateId = document.getElementById('projectTemplate').value;
+    const categoryId = document.getElementById('projectCategory').value;
+    
+    try {
+        const response = await fetch('/api/create_project', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                deadline: deadline || null,
+                template_id: templateId || null,
+                category_id: categoryId || null
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error creating project: ' + error.message);
+    }
+});
+
+// View switching functionality
+let currentView = 'card';
+
+function switchView(viewType) {
+    const cardContainer = document.getElementById('projectsContainer');
+    const listContainer = document.getElementById('projectsListContainer');
+    const cardViewBtn = document.getElementById('cardViewBtn');
+    const listViewBtn = document.getElementById('listViewBtn');
+    
+    if (viewType === 'card') {
+        cardContainer.classList.remove('d-none');
+        listContainer.classList.add('d-none');
+        cardViewBtn.classList.add('btn-secondary');
+        cardViewBtn.classList.remove('btn-outline-secondary');
+        listViewBtn.classList.add('btn-outline-secondary');
+        listViewBtn.classList.remove('btn-secondary');
+        currentView = 'card';
+    } else if (viewType === 'list') {
+        cardContainer.classList.add('d-none');
+        listContainer.classList.remove('d-none');
+        listViewBtn.classList.add('btn-secondary');
+        listViewBtn.classList.remove('btn-outline-secondary');
+        cardViewBtn.classList.add('btn-outline-secondary');
+        cardViewBtn.classList.remove('btn-secondary');
+        currentView = 'list';
+    }
+    
+    // Store preference in localStorage
+    localStorage.setItem('projectViewType', viewType);
+}
+
+// Initialize view on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Get saved preference or default to card view
+    const savedView = localStorage.getItem('projectViewType') || 'card';
+    switchView(savedView);
+});
+
+// Update list view filtering
+function filterListView() {
+    const listItems = document.querySelectorAll('.project-list-item');
+    const searchTerm = document.getElementById('projectSearch').value.toLowerCase();
+    const statusFilter = document.getElementById('statusFilter').value;
+    const categoryFilter = document.getElementById('categoryFilter').value;
+    
+    listItems.forEach(item => {
+        let visible = true;
+        
+        // Search filter
+        if (searchTerm) {
+            const name = item.dataset.name;
+            const description = item.dataset.description;
+            if (!name.includes(searchTerm) && !description.includes(searchTerm)) {
+                visible = false;
+            }
+        }
+        
+        // Status filter
+        if (statusFilter && item.dataset.status !== statusFilter) {
+            visible = false;
+        }
+        
+        // Category filter
+        if (categoryFilter && item.dataset.category !== categoryFilter) {
+            visible = false;
+        }
+        
+        item.style.display = visible ? '' : 'none';
+    });
+}
+
+// List view sorting functionality
+let listSortDescending = false;
+let currentListSortColumn = 'name';
+
+function sortListView(sortBy) {
+    const tbody = document.getElementById('projectsListBody');
+    if (!tbody) return;
+    
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+    
+    // Update current sort column if changed
+    currentListSortColumn = sortBy;
+    
+    rows.sort((a, b) => {
+        let aValue, bValue;
+        
+        switch (sortBy) {
+            case 'name':
+                aValue = a.dataset.name;
+                bValue = b.dataset.name;
+                break;
+            case 'category':
+                aValue = a.dataset.categoryName;
+                bValue = b.dataset.categoryName;
+                break;
+            case 'stage':
+                aValue = a.dataset.stage;
+                bValue = b.dataset.stage;
+                break;
+            case 'progress':
+                aValue = parseFloat(a.dataset.progress);
+                bValue = parseFloat(b.dataset.progress);
+                break;
+            case 'status':
+                aValue = a.dataset.status;
+                bValue = b.dataset.status;
+                // Custom status order: active -> completed -> overdue
+                const statusOrder = { 'active': 0, 'completed': 1, 'overdue': 2 };
+                aValue = statusOrder[aValue] || 0;
+                bValue = statusOrder[bValue] || 0;
+                break;
+            case 'deadline':
+                aValue = a.dataset.deadline || '9999-12-31';
+                bValue = b.dataset.deadline || '9999-12-31';
+                break;
+            default:
+                return 0;
+        }
+        
+        if (aValue < bValue) {
+            return listSortDescending ? 1 : -1;
+        }
+        if (aValue > bValue) {
+            return listSortDescending ? -1 : 1;
+        }
+        return 0;
+    });
+    
+    // Re-append sorted rows
+    rows.forEach(row => tbody.appendChild(row));
+    
+    // Update header icons to show current sort
+    updateListHeaderIcons();
+    
+    // Add subtle animation
+    tbody.style.opacity = '0.7';
+    setTimeout(() => {
+        tbody.style.opacity = '1';
+    }, 150);
+}
+
+function updateListHeaderIcons() {
+    // Reset all header icons
+    document.querySelectorAll('#projectsListContainer .sortable-header i').forEach(icon => {
+        icon.className = 'fas fa-sort text-muted';
+    });
+    
+    // Update active column icon
+    const activeHeader = document.querySelector(`#projectsListContainer .sortable-header[data-sort="${currentListSortColumn}"]`);
+    if (activeHeader) {
+        const icon = activeHeader.querySelector('i');
+        if (listSortDescending) {
+            icon.className = 'fas fa-sort-up text-primary';
+        } else {
+            icon.className = 'fas fa-sort-down text-primary';
+        }
+    }
+}
+
+// Override existing filter functions to work with both views  
+document.addEventListener('DOMContentLoaded', function() {
+    // Add event listeners for filters that also update list view
+    document.getElementById('projectSearch').addEventListener('input', function() {
+        filterProjects(); // Filter card view
+        filterListView(); // Filter list view
+    });
+    document.getElementById('statusFilter').addEventListener('change', function() {
+        filterProjects(); // Filter card view
+        filterListView(); // Filter list view
+    });
+    document.getElementById('categoryFilter').addEventListener('change', function() {
+        filterProjects(); // Filter card view
+        filterListView(); // Filter list view
+    });
+    
+    // Add click event listeners to list view sortable column headers
+    document.querySelectorAll('#projectsListContainer .sortable-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const sortBy = this.dataset.sort;
+            
+            // Toggle sort order if clicking the same column
+            if (currentListSortColumn === sortBy) {
+                listSortDescending = !listSortDescending;
+            } else {
+                // Reset to ascending for new column
+                listSortDescending = false;
+                currentListSortColumn = sortBy;
+            }
+            
+            sortListView(sortBy);
+        });
+    });
+});
+
+// Import/Export functionality
+let currentImportType = '';
+
+async function exportData(type) {
+    try {
+        const response = await fetch(`/api/export/${type}`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Create a blob with the JSON data
+            const blob = new Blob([JSON.stringify(data, null, 2)], {
+                type: 'application/json'
+            });
+            
+            // Create download link
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${type}-export-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Show success message
+            const counts = data.counts || { [type]: data.count || (data[type] ? data[type].length : 0) };
+            let message = `Successfully exported `;
+            if (type === 'all') {
+                message += `${counts.projects} projects, ${counts.templates} templates, and ${counts.categories} categories`;
+            } else {
+                message += `${counts[type] || data.count || (data[type] ? data[type].length : 0)} ${type}`;
+            }
+            alert(message + '.');
+        } else {
+            alert('Export failed: ' + data.error);
+        }
+    } catch (error) {
+        alert('Export failed: ' + error.message);
+    }
+}
+
+function setImportType(type) {
+    currentImportType = type;
+    const modalTitle = document.getElementById('importModalTitle');
+    const typeLabel = type === 'all' ? 'All Data' : type.charAt(0).toUpperCase() + type.slice(1);
+    modalTitle.textContent = `Import ${typeLabel}`;
+    document.getElementById('importType').value = type;
+    
+    // Reset form
+    document.getElementById('importFile').value = '';
+    document.getElementById('importPreview').style.display = 'none';
+    document.getElementById('importSubmitBtn').disabled = true;
+}
+
+// File preview functionality
+document.getElementById('importFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    const submitBtn = document.getElementById('importSubmitBtn');
+    const preview = document.getElementById('importPreview');
+    const previewContent = document.getElementById('importPreviewContent');
+    
+    if (!file) {
+        submitBtn.disabled = true;
+        preview.style.display = 'none';
+        return;
+    }
+    
+    if (file.type !== 'application/json') {
+        alert('Please select a JSON file.');
+        e.target.value = '';
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            
+            // Validate data structure
+            if (currentImportType === 'projects' && !data.projects) {
+                throw new Error('Invalid projects file format');
+            } else if (currentImportType === 'templates' && !data.templates) {
+                throw new Error('Invalid templates file format');
+            } else if (currentImportType === 'all' && (!data.projects && !data.templates && !data.categories)) {
+                throw new Error('Invalid data file format');
+            }
+            
+            // Show preview
+            let previewText = '';
+            if (currentImportType === 'projects' || currentImportType === 'all') {
+                const projectCount = data.projects ? data.projects.length : 0;
+                previewText += `<strong>Projects:</strong> ${projectCount}<br>`;
+            }
+            if (currentImportType === 'templates' || currentImportType === 'all') {
+                const templateCount = data.templates ? data.templates.length : 0;
+                previewText += `<strong>Templates:</strong> ${templateCount}<br>`;
+            }
+            if (currentImportType === 'all') {
+                const categoryCount = data.categories ? data.categories.length : 0;
+                previewText += `<strong>Categories:</strong> ${categoryCount}<br>`;
+            }
+            
+            previewContent.innerHTML = previewText;
+            preview.style.display = 'block';
+            submitBtn.disabled = false;
+            
+        } catch (error) {
+            alert('Invalid JSON file: ' + error.message);
+            e.target.value = '';
+            preview.style.display = 'none';
+            submitBtn.disabled = true;
+        }
+    };
+    reader.readAsText(file);
+});
+
+// Import form submission
+document.getElementById('importForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const fileInput = document.getElementById('importFile');
+    const importType = document.getElementById('importType').value;
+    const submitBtn = document.getElementById('importSubmitBtn');
+    
+    if (!fileInput.files[0]) {
+        alert('Please select a file to import.');
+        return;
+    }
+    
+    try {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-1"></i>Importing...';
+        
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        
+        reader.onload = async function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                
+                const response = await fetch(`/api/import/${importType}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    alert(result.message);
+                    bootstrap.Modal.getInstance(document.getElementById('importModal')).hide();
+                    location.reload();
+                } else {
+                    alert('Import failed: ' + result.error);
+                }
+            } catch (error) {
+                alert('Import failed: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Import Data';
+            }
+        };
+        
+        reader.readAsText(file);
+        
+    } catch (error) {
+        alert('Import failed: ' + error.message);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-upload me-1"></i>Import Data';
+    }
+});
+
+// Project deletion with simple confirmation
+async function confirmDeleteProject(projectId, projectName) {
+    // Single confirmation
+    const confirmed = confirm(`Are you sure you want to delete the project "${projectName}"?\n\nThis action cannot be undone and will permanently remove all project data, stages, and tasks.`);
+    
+    if (!confirmed) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Project deleted successfully.');
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting project: ' + error.message);
+    }
+}
+
+// Batch Operations Functions
+function updateBatchOperations() {
+    const checkboxes = document.querySelectorAll('.project-checkbox:checked');
+    const count = checkboxes.length;
+    
+    // Update counter
+    document.getElementById('selectedCount').textContent = count;
+    
+    // Show/hide batch operations bar
+    const batchBar = document.getElementById('batchOperationsBar');
+    if (count > 0) {
+        batchBar.style.display = 'block';
+    } else {
+        batchBar.style.display = 'none';
+    }
+    
+    // Enable/disable batch action buttons
+    const batchDeleteBtn = document.getElementById('batchDeleteBtn');
+    const batchMoveBtn = document.getElementById('batchMoveBtn');
+    
+    batchDeleteBtn.disabled = count === 0;
+    batchMoveBtn.disabled = count === 0;
+    
+    // Update select all checkbox state
+    const allCheckboxes = document.querySelectorAll('.project-checkbox');
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectAllListCheckbox = document.getElementById('selectAllListCheckbox');
+    
+    if (count === 0) {
+        if (selectAllCheckbox) selectAllCheckbox.indeterminate = false;
+        if (selectAllCheckbox) selectAllCheckbox.checked = false;
+        if (selectAllListCheckbox) selectAllListCheckbox.indeterminate = false;
+        if (selectAllListCheckbox) selectAllListCheckbox.checked = false;
+    } else if (count === allCheckboxes.length) {
+        if (selectAllCheckbox) selectAllCheckbox.indeterminate = false;
+        if (selectAllCheckbox) selectAllCheckbox.checked = true;
+        if (selectAllListCheckbox) selectAllListCheckbox.indeterminate = false;
+        if (selectAllListCheckbox) selectAllListCheckbox.checked = true;
+    } else {
+        if (selectAllCheckbox) selectAllCheckbox.indeterminate = true;
+        if (selectAllListCheckbox) selectAllListCheckbox.indeterminate = true;
+    }
+}
+
+function toggleSelectAll() {
+    const selectAllChecked = document.getElementById('selectAllCheckbox')?.checked || 
+                           document.getElementById('selectAllListCheckbox')?.checked;
+    const projectCheckboxes = document.querySelectorAll('.project-checkbox');
+    
+    projectCheckboxes.forEach(checkbox => {
+        checkbox.checked = selectAllChecked;
+    });
+    
+    // Sync both select all checkboxes
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectAllListCheckbox = document.getElementById('selectAllListCheckbox');
+    if (selectAllCheckbox && selectAllListCheckbox) {
+        selectAllCheckbox.checked = selectAllChecked;
+        selectAllListCheckbox.checked = selectAllChecked;
+    }
+    
+    updateBatchOperations();
+}
+
+function clearSelection() {
+    const projectCheckboxes = document.querySelectorAll('.project-checkbox');
+    projectCheckboxes.forEach(checkbox => {
+        checkbox.checked = false;
+    });
+    
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    const selectAllListCheckbox = document.getElementById('selectAllListCheckbox');
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    if (selectAllListCheckbox) selectAllListCheckbox.checked = false;
+    
+    updateBatchOperations();
+}
+
+async function batchDeleteProjects() {
+    const selectedCheckboxes = document.querySelectorAll('.project-checkbox:checked');
+    const projectIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    if (projectIds.length === 0) {
+        alert('No projects selected');
+        return;
+    }
+    
+    const confirmed = confirm(`Are you sure you want to delete ${projectIds.length} project(s)?\n\nThis action cannot be undone and will permanently remove all project data, stages, and tasks.`);
+    
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch('/api/projects/batch_delete', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ project_ids: projectIds })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`Successfully deleted ${result.deleted_count} project(s).`);
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting projects: ' + error.message);
+    }
+}
+
+async function batchMoveToCategory(categoryId, categoryName) {
+    const selectedCheckboxes = document.querySelectorAll('.project-checkbox:checked');
+    const projectIds = Array.from(selectedCheckboxes).map(cb => cb.value);
+    
+    if (projectIds.length === 0) {
+        alert('No projects selected');
+        return;
+    }
+    
+    const actionText = categoryId ? `move ${projectIds.length} project(s) to "${categoryName}"` : `remove category from ${projectIds.length} project(s)`;
+    const confirmed = confirm(`Are you sure you want to ${actionText}?`);
+    
+    if (!confirmed) return;
+    
+    try {
+        const response = await fetch('/api/projects/batch_move_category', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 
+                project_ids: projectIds, 
+                category_id: categoryId || null 
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert(`Successfully moved ${result.updated_count} project(s) to ${categoryName}.`);
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error moving projects: ' + error.message);
+    }
+}
+</script>
+{% endblock %}

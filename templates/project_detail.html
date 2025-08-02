@@ -1,0 +1,453 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} - Project Management System{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{{ url_for('index') }}">Dashboard</a></li>
+                <li class="breadcrumb-item active">{{ project.name }}</li>
+            </ol>
+        </nav>
+        <h1>{{ project.name }}</h1>
+        <p class="text-muted">{{ project.description or 'No description' }}</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="d-flex flex-column align-items-end">
+            <span class="badge bg-{% if project.is_completed() %}success{% else %}primary{% endif %} fs-6 mb-2">
+                {% if project.is_completed() %}
+                    <i class="fas fa-check me-1"></i>Complete
+                {% else %}
+                    <i class="fas fa-clock me-1"></i>{{ "%.1f"|format(project.get_overall_progress() * 100) }}% Complete
+                {% endif %}
+            </span>
+            
+            {% if project.is_overdue() %}
+            <span class="badge bg-danger mb-1">
+                <i class="fas fa-exclamation me-1"></i>Overdue
+            </span>
+            {% elif project.days_until_deadline() is not none and project.days_until_deadline() <= 3 and not project.is_completed() %}
+            <span class="badge bg-warning mb-1">
+                <i class="fas fa-clock me-1"></i>Due in {{ project.days_until_deadline() }} days
+            </span>
+            {% endif %}
+            
+            <div class="btn-group" role="group">
+                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#editProjectModal">
+                    <i class="fas fa-edit me-1"></i>Edit Project
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDeleteProject('{{ project.id }}', '{{ project.name }}')">
+                    <i class="fas fa-trash me-1"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Project Overview -->
+<div class="row mb-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Overall Progress</h5>
+                <div class="progress mb-3" style="height: 20px;">
+                    <div class="progress-bar progress-bar-striped" role="progressbar" 
+                         style="width: {{ project.get_overall_progress() * 100 }}%"
+                         aria-valuenow="{{ project.get_overall_progress() * 100 }}" 
+                         aria-valuemin="0" aria-valuemax="100">
+                        {{ "%.1f"|format(project.get_overall_progress() * 100) }}%
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col">
+                        <h6 class="text-muted">Total Stages</h6>
+                        <h4>{{ project.stages|length }}</h4>
+                    </div>
+                    <div class="col">
+                        <h6 class="text-muted">Completed Stages</h6>
+                        <h4 class="text-success">{{ project.stages|selectattr('status.value', 'equalto', 'completed')|list|length }}</h4>
+                    </div>
+                    <div class="col">
+                        <h6 class="text-muted">Total Tasks</h6>
+                        <h4>
+                            {% set total_tasks = 0 %}
+                            {% for stage in project.stages %}
+                                {% set total_tasks = total_tasks + stage.tasks|length %}
+                            {% endfor %}
+                            {{ total_tasks }}
+                        </h4>
+                    </div>
+                </div>
+                
+                <!-- Project Info -->
+                <div class="mt-3 pt-3 border-top">
+                    {% if project.deadline %}
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i><strong>Deadline:</strong> 
+                            {{ project.deadline[:10] }}
+                            {% if project.days_until_deadline() is not none %}
+                                ({{ project.days_until_deadline() }} days remaining)
+                            {% endif %}
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if project.category_id %}
+                        {% for category in categories %}
+                            {% if category.id == project.category_id %}
+                            <div class="mb-2">
+                                <small class="text-muted">
+                                    <i class="fas fa-tag me-1" style="color: {{ category.color }}"></i><strong>Category:</strong> 
+                                    <span style="color: {{ category.color }}">{{ category.name }}</span>
+                                </small>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Quick Actions</h5>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                        <i class="fas fa-plus me-1"></i>Add Task
+                    </button>
+                    {% if not project.is_completed() %}
+                    <button class="btn btn-outline-success" onclick="advanceStage('{{ project.id }}')">
+                        <i class="fas fa-arrow-right me-1"></i>Next Stage
+                    </button>
+                    {% endif %}
+                    
+                    {% set current_stage = project.get_current_stage() %}
+                    {% if (current_stage and project.stages.index(current_stage) > 0) or project.is_completed() %}
+                    <button class="btn btn-outline-warning" onclick="goBackStage('{{ project.id }}')">
+                        <i class="fas fa-arrow-left me-1"></i>Previous Stage
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stages -->
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">Project Stages</h3>
+        {% for stage in project.stages %}
+        <div class="card mb-3 stage-card">
+            <div class="card-header">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h5 class="mb-0">
+                            {% if stage.status.value == 'completed' %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                            {% elif stage.status.value == 'in_progress' %}
+                                <i class="fas fa-clock text-primary me-2"></i>
+                            {% else %}
+                                <i class="fas fa-pause-circle text-muted me-2"></i>
+                            {% endif %}
+                            {{ stage.name }}
+                            <small class="text-muted ms-2">({{ stage.status.value.replace('_', ' ').title() }})</small>
+                        </h5>
+                        {% if stage.description %}
+                        <small class="text-muted">{{ stage.description }}</small>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-light text-dark">
+                            {{ (stage.tasks|selectattr('status', 'equalto', 'completed')|list|length) }} / {{ stage.tasks|length }} tasks
+                        </span>
+                        <div class="progress mt-1" style="height: 5px;">
+                            <div class="progress-bar" style="width: {{ stage.get_progress() * 100 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            {% if stage.tasks %}
+            <div class="card-body">
+                <div class="row">
+                    {% for task in stage.tasks %}
+                    <div class="col-md-6 mb-2">
+                        <div class="d-flex align-items-center">
+                            {% set task_status = task.status.value if task.status.value is defined else task.status %}
+                            {% if task_status == 'completed' %}
+                                <i class="fas fa-check-circle text-success me-2"></i>
+                            {% elif task_status == 'in_progress' %}
+                                <i class="fas fa-clock text-primary me-2"></i>
+                            {% elif task_status == 'blocked' %}
+                                <i class="fas fa-exclamation-circle text-danger me-2"></i>
+                            {% else %}
+                                <i class="far fa-circle text-muted me-2"></i>
+                            {% endif %}
+                            
+                            <div class="flex-grow-1">
+                                <strong>{{ task.name }}</strong>
+                                {% if task.assignee %}
+                                    <small class="text-muted d-block">Assigned to: {{ task.assignee }}</small>
+                                {% endif %}
+                                {% if task.description %}
+                                    <small class="text-muted d-block">{{ task.description }}</small>
+                                {% endif %}
+                            </div>
+                            
+                            {% if task_status != 'completed' %}
+                            <button class="btn btn-sm btn-outline-success ms-2" 
+                                    onclick="completeTask('{{ task.id }}')">
+                                <i class="fas fa-check"></i>
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card-body text-center text-muted">
+                <i class="fas fa-inbox fa-2x mb-2"></i>
+                <p>No tasks in this stage yet</p>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addTaskForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="taskName" class="form-label">Task Name *</label>
+                        <input type="text" class="form-control" id="taskName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="taskDescription" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="taskAssignee" class="form-label">Assignee</label>
+                        <input type="text" class="form-control" id="taskAssignee">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Project Modal -->
+<div class="modal fade" id="editProjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Project</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="editProjectForm">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="editDeadline" class="form-label">Deadline</label>
+                        <input type="date" class="form-control" id="editDeadline" 
+                               value="{% if project.deadline %}{{ project.deadline[:10] }}{% endif %}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editCategory" class="form-label">Category</label>
+                        <select class="form-control" id="editCategory">
+                            <option value="">No Category</option>
+                            {% for category in categories %}
+                            <option value="{{ category.id }}" 
+                                    {% if category.id == project.category_id %}selected{% endif %}>
+                                {{ category.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Project</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const projectId = '{{ project.id }}';
+
+document.getElementById('addTaskForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('taskName').value;
+    const description = document.getElementById('taskDescription').value;
+    const assignee = document.getElementById('taskAssignee').value;
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/add_task`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                name: name,
+                description: description,
+                assignee: assignee
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error adding task: ' + error.message);
+    }
+});
+
+async function completeTask(taskId) {
+    try {
+        const response = await fetch(`/api/task/${taskId}/complete`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error completing task: ' + error.message);
+    }
+}
+
+async function advanceStage(projectId) {
+    if (!confirm('Are you sure you want to advance to the next stage? This will complete the current stage.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/next_stage`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error advancing stage: ' + error.message);
+    }
+}
+
+async function goBackStage(projectId) {
+    if (!confirm('Are you sure you want to go back to the previous stage? This will reopen the previous stage.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/previous_stage`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error going back to previous stage: ' + error.message);
+    }
+}
+
+// Edit project functionality
+document.getElementById('editProjectForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const deadline = document.getElementById('editDeadline').value;
+    const categoryId = document.getElementById('editCategory').value;
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/update`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                deadline: deadline || null,
+                category_id: categoryId || null
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error updating project: ' + error.message);
+    }
+});
+
+// Project deletion with simple confirmation
+async function confirmDeleteProject(projectId, projectName) {
+    // Single confirmation
+    const confirmed = confirm(`Are you sure you want to delete the project "${projectName}"?\n\nThis action cannot be undone and will permanently remove all project data, stages, and tasks.`);
+    
+    if (!confirmed) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/api/project/${projectId}/delete`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            alert('Project deleted successfully.');
+            window.location.href = '/';
+        } else {
+            alert('Error: ' + result.error);
+        }
+    } catch (error) {
+        alert('Error deleting project: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
