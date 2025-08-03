@@ -1,6 +1,6 @@
 # Project Management System
 
-A comprehensive command-line project management tool that helps you organize projects into stages and track tasks through completion.
+A comprehensive command-line and web-based project management tool that helps you organize projects into stages and track tasks through completion.
 
 ## Features
 
@@ -9,9 +9,19 @@ A comprehensive command-line project management tool that helps you organize pro
 - **Progress Monitoring**: Track progress at both task and project levels
 - **Data Persistence**: Automatically saves and loads projects from JSON
 - **Interactive CLI**: Easy-to-use command-line interface
-- **Stage Advancement**: Automatic progression through project stages
+- **Web Interface**: Modern web UI with real-time updates
+- **Batch Operations**: Select and manage multiple projects at once
+- **Categories**: Organize projects by categories with custom colors
+- **Templates**: Create project templates for common workflows
+- **Real-time Updates**: Web interface updates automatically without page refresh
 
 ## Quick Start
+
+### Run the Web Interface
+```bash
+python3 web_app.py
+```
+Then visit: http://localhost:8083
 
 ### Run the CLI Interface
 ```bash
@@ -21,6 +31,16 @@ python3 cli.py
 ### Run the Example Demo
 ```bash
 python3 example_usage.py
+```
+
+### Run Automation Demo
+```bash
+python3 automation_demo.py
+```
+
+### Run Batch Operations Demo
+```bash
+python3 batch_operations_demo.py
 ```
 
 ## CLI Commands
@@ -51,6 +71,25 @@ python3 example_usage.py
 - `current` - Show current project and stage
 - `help` - Show help message
 - `quit` - Exit the program
+
+## Web Interface Features
+
+### Batch Operations
+- Select multiple projects using checkboxes
+- Batch delete multiple projects
+- Batch move projects to categories
+- Visual selection counter and action bar
+
+### Real-time Updates
+- Automatic data reloading when projects.json changes
+- No page refresh needed for updates
+- Live progress tracking
+
+### Project Categories
+- Create custom categories with colors
+- Assign projects to categories
+- Filter projects by category
+- Set default categories
 
 ## Usage Example
 
@@ -112,4 +151,5 @@ Projects are automatically saved to `projects.json` in the current directory. Al
 ## Requirements
 
 - Python 3.6+
-- No external dependencies required
+- Flask (for web interface)
+- No other external dependencies required
