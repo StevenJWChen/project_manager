@@ -26,7 +26,9 @@
       "Bash(git commit:*)",
       "Bash(./auto_commit.sh)",
       "Bash(timeout:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(ls:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

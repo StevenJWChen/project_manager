@@ -64,7 +64,7 @@ def dashboard():
         return "Error loading dashboard", 500
 
 @app.route('/projects')
-def projects():
+def index():
     try:
         pm = get_project_manager()  # Get fresh data
         projects = pm.list_projects()
