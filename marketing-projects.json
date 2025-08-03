@@ -626,5 +626,11 @@
       "is_default": true
     }
   },
-  "default_category_id": "09f50273-e366-4653-960e-c973efdc92bd"
+  "default_category_id": "09f50273-e366-4653-960e-c973efdc92bd",
+  "metadata": {
+    "subtitle": "Marketing Campaigns & Initiatives - Growing Our Brand",
+    "description": "",
+    "created_at": "2025-08-03T08:56:11.570363",
+    "last_modified": "2025-08-03T08:57:03.708581"
+  }
 }

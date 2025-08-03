@@ -302,6 +302,7 @@ class ProjectManager:
         self.categories: Dict[str, Category] = {}
         self.templates: Dict[str, Dict] = {}
         self.default_category_id: Optional[str] = None
+        self.metadata: Dict = {}
         self.default_stage_tasks = {
             "Planning": ["Define requirements", "Create timeline", "Assign resources"],
             "Design": ["Create wireframes", "Design mockups", "Review design"],
@@ -433,7 +434,8 @@ class ProjectManager:
             'projects': {pid: p.to_dict() for pid, p in self.projects.items()},
             'categories': {cid: c.to_dict() for cid, c in self.categories.items()},
             'templates': self.templates,
-            'default_category_id': self.default_category_id
+            'default_category_id': self.default_category_id,
+            'metadata': self.metadata
         }
         try:
             with open(self.data_file, 'w') as f:
@@ -444,6 +446,7 @@ class ProjectManager:
     def load_data(self):
         if not os.path.exists(self.data_file):
             self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None
+            self.metadata = self._get_default_metadata()
             self._create_default_templates()
             return
 
@@ -454,12 +457,46 @@ class ProjectManager:
                 self.categories = {cid: Category.from_dict(c_data) for cid, c_data in data.get('categories', {}).items()}
                 self.templates = data.get('templates', {})
                 self.default_category_id = data.get('default_category_id')
+                self.metadata = data.get('metadata', self._get_default_metadata())
+                
+                # Ensure metadata has all required fields
+                default_metadata = self._get_default_metadata()
+                for key, value in default_metadata.items():
+                    if key not in self.metadata:
+                        self.metadata[key] = value
+                
                 if not self.templates:
                     self._create_default_templates()
         except (json.JSONDecodeError, KeyError, TypeError) as e:
             print(f"Warning: Could not load or parse {self.data_file}. Starting fresh. Error: {e}")
             self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None
+            self.metadata = self._get_default_metadata()
             self._create_default_templates()
+
+    def _get_default_metadata(self):
+        """Get default metadata structure"""
+        return {
+            'subtitle': 'Comprehensive Project Management System with Real-time Updates',
+            'description': '',
+            'created_at': datetime.now().isoformat(),
+            'last_modified': datetime.now().isoformat()
+        }
+
+    def update_metadata(self, **kwargs):
+        """Update metadata fields"""
+        for key, value in kwargs.items():
+            if key in ['subtitle', 'description']:
+                self.metadata[key] = value
+        self.metadata['last_modified'] = datetime.now().isoformat()
+        self.save_data()
+
+    def get_subtitle(self):
+        """Get the current subtitle"""
+        return self.metadata.get('subtitle', 'Comprehensive Project Management System with Real-time Updates')
+
+    def set_subtitle(self, subtitle: str):
+        """Set a new subtitle"""
+        self.update_metadata(subtitle=subtitle)
 
     def _create_default_templates(self):
         """Create default project templates"""

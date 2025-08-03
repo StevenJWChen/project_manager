@@ -69,7 +69,7 @@ def dashboard():
             category.project_count = len([p for p in projects if p.category_id == category.id])
         
         logging.info(f"Dashboard: {len(projects)} projects, {len(categories)} categories")
-        return render_template('dashboard.html', projects=projects, categories=categories, summary=summary, current_file=_current_project_file)
+        return render_template('dashboard.html', projects=projects, categories=categories, summary=summary, current_file=_current_project_file, subtitle=pm.get_subtitle())
     except Exception as e:
         logging.error(f"Error rendering dashboard: {e}")
         return "Error loading dashboard", 500
@@ -1015,6 +1015,24 @@ def api_delete_project_file():
         
     except Exception as e:
         logging.error(f"Error deleting project file: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/update-subtitle', methods=['POST'])
+def api_update_subtitle():
+    try:
+        data = request.json
+        subtitle = data.get('subtitle', '').strip()
+        
+        if not subtitle:
+            return jsonify({'error': 'Subtitle cannot be empty'}), 400
+        
+        pm = get_project_manager()
+        pm.set_subtitle(subtitle)
+        
+        return jsonify({'success': True, 'subtitle': subtitle})
+        
+    except Exception as e:
+        logging.error(f"Error updating subtitle: {e}")
         return jsonify({'error': 'Internal Server Error'}), 500
 
 if __name__ == '__main__':

@@ -140,5 +140,11 @@
       "is_default": true
     }
   },
-  "default_category_id": "db4197b0-bb23-464c-9aee-1c192b4750ab"
+  "default_category_id": "db4197b0-bb23-464c-9aee-1c192b4750ab",
+  "metadata": {
+    "subtitle": "Test Custom Subtitle",
+    "description": "",
+    "created_at": "2025-08-03T08:56:11.567893",
+    "last_modified": "2025-08-03T08:57:20.549875"
+  }
 }

@@ -221,7 +221,27 @@
     <div class="hero-section text-center">
         <div class="container">
             <h1 class="hero-title fade-in">🚀 Project Manager</h1>
-            <p class="hero-subtitle fade-in">Comprehensive Project Management System with Real-time Updates</p>
+            <div class="hero-subtitle fade-in">
+                <span id="subtitleDisplay">{{ subtitle }}</span>
+                <button class="btn btn-sm btn-light ms-2 opacity-75" onclick="editSubtitle()" title="Edit subtitle">
+                    <i class="fas fa-edit"></i>
+                </button>
+            </div>
+            <div id="subtitleEditor" style="display: none;" class="mt-2">
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="subtitleInput" placeholder="Enter custom subtitle">
+                            <button class="btn btn-success" onclick="saveSubtitle()">
+                                <i class="fas fa-save"></i> Save
+                            </button>
+                            <button class="btn btn-secondary" onclick="cancelEditSubtitle()">
+                                <i class="fas fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
             
             <!-- Project File Selector -->
             <div class="row justify-content-center mb-4">
@@ -1062,6 +1082,67 @@
         // Load project files on page load
         document.addEventListener('DOMContentLoaded', function() {
             loadProjectFiles();
+        });
+
+        // Subtitle editing functions
+        function editSubtitle() {
+            const display = document.getElementById('subtitleDisplay');
+            const editor = document.getElementById('subtitleEditor');
+            const input = document.getElementById('subtitleInput');
+            
+            input.value = display.textContent;
+            display.style.display = 'none';
+            editor.style.display = 'block';
+            input.focus();
+            input.select();
+        }
+
+        function saveSubtitle() {
+            const input = document.getElementById('subtitleInput');
+            const newSubtitle = input.value.trim();
+            
+            if (!newSubtitle) {
+                showNotification('Subtitle cannot be empty.', 'error');
+                return;
+            }
+            
+            fetch('/api/update-subtitle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ subtitle: newSubtitle })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('subtitleDisplay').textContent = newSubtitle;
+                    cancelEditSubtitle();
+                    showNotification('Subtitle updated successfully!', 'success');
+                } else {
+                    showNotification('Failed to update subtitle.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating subtitle:', error);
+                showNotification('Error updating subtitle.', 'error');
+            });
+        }
+
+        function cancelEditSubtitle() {
+            document.getElementById('subtitleDisplay').style.display = 'inline';
+            document.getElementById('subtitleEditor').style.display = 'none';
+        }
+
+        // Allow Enter key to save subtitle
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('subtitleInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    saveSubtitle();
+                } else if (e.key === 'Escape') {
+                    cancelEditSubtitle();
+                }
+            });
         });
     </script>
 </body>
