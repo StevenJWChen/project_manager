@@ -12,7 +12,19 @@
       "Bash(curl:*)",
       "Bash(python:*)",
       "Bash(grep:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(git config:*)",
+      "Bash(chmod:*)",
+      "Bash(./push_to_github.sh)",
+      "Bash(ssh-keygen:*)",
+      "Bash(cat:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(ssh:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(./auto_commit.sh)"
     ],
     "deny": []
   }
