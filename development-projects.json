@@ -1,0 +1,630 @@
+{
+  "projects": {
+    "18ff5d1b-6811-44a8-adb0-3d7a9fe8f09c": {
+      "id": "18ff5d1b-6811-44a8-adb0-3d7a9fe8f09c",
+      "name": "Website Redesign",
+      "description": "Complete company website overhaul",
+      "deadline": null,
+      "category_id": "dec3fb97-1a9d-4a16-89bb-dec9fea6a862",
+      "stages": [
+        {
+          "id": "e97f0e35-1d16-47cf-b6d9-a120bf2b27d6",
+          "name": "Planning",
+          "description": "Stage for Planning",
+          "status": "in_progress",
+          "tasks": [
+            {
+              "id": "2aa7dfb2-6829-4c91-a3e6-70c4234e2ec1",
+              "name": "Define requirements",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723630",
+              "completed_at": null
+            },
+            {
+              "id": "7e8d05ba-d260-4e07-bedb-97ef1e3be941",
+              "name": "Create timeline",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723633",
+              "completed_at": null
+            },
+            {
+              "id": "ebf0067a-e297-466d-8a75-f6c67d9bc2cc",
+              "name": "Assign resources",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723636",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723626",
+          "started_at": "2025-08-03T08:51:59.723690",
+          "completed_at": null
+        },
+        {
+          "id": "154a4d74-08da-465b-9580-38918f635874",
+          "name": "Design",
+          "description": "Stage for Design",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "baaa9b0a-d1f9-43e3-a9f3-12c56a7a5c21",
+              "name": "Create wireframes",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723643",
+              "completed_at": null
+            },
+            {
+              "id": "3016b0c7-b47f-4480-83c3-8158e2c2dec6",
+              "name": "Design mockups",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723646",
+              "completed_at": null
+            },
+            {
+              "id": "ac5ae1aa-af69-4442-8816-034866e99671",
+              "name": "Review design",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723649",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723640",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "94443e86-3744-4476-a15b-1c29a9eb370a",
+          "name": "Development",
+          "description": "Stage for Development",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "376c31fb-dd7e-4c8d-bbe8-006f9171bdae",
+              "name": "Set up environment",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723654",
+              "completed_at": null
+            },
+            {
+              "id": "1a7b5e55-e110-465a-98e5-03aa2913ba07",
+              "name": "Implement features",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723657",
+              "completed_at": null
+            },
+            {
+              "id": "c0f075ed-c866-4989-8f14-ec9a19ae314d",
+              "name": "Code review",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723659",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723652",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "025e6c40-aa5a-4329-96aa-b50e247cc484",
+          "name": "Testing",
+          "description": "Stage for Testing",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "7292280b-4a80-4075-84c6-c67b01f52d91",
+              "name": "Write test cases",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723664",
+              "completed_at": null
+            },
+            {
+              "id": "c8c34f56-532b-4816-9b43-722c5066d764",
+              "name": "Execute tests",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723667",
+              "completed_at": null
+            },
+            {
+              "id": "e5a0d135-8603-47e1-a366-42a8d278792e",
+              "name": "Fix bugs",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723669",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723662",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "0491fa88-76cf-4973-be86-bae44081c637",
+          "name": "Deployment",
+          "description": "Stage for Deployment",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "8c9566e0-623f-499d-b534-45cef583fead",
+              "name": "Deploy to staging",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723674",
+              "completed_at": null
+            },
+            {
+              "id": "744de448-9c26-480c-a7ea-b054a3ebe830",
+              "name": "User acceptance testing",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723677",
+              "completed_at": null
+            },
+            {
+              "id": "0ccb7d41-e2b6-4d69-9bc0-7604293b8b99",
+              "name": "Deploy to production",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723679",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723672",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "a8b13a8b-6854-4531-b501-fa62f94b946b",
+          "name": "Launch",
+          "description": "Stage for Launch",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "5055ab73-6f19-4e28-99d0-f8a76483485c",
+              "name": "Monitor launch",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723684",
+              "completed_at": null
+            },
+            {
+              "id": "7bf296b8-ab08-49e0-a968-a06aa701e13c",
+              "name": "Gather feedback",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723686",
+              "completed_at": null
+            },
+            {
+              "id": "414970c4-2a10-4a3c-b016-288444b2e54e",
+              "name": "Create documentation",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723689",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723682",
+          "started_at": null,
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-08-03T08:51:59.723620",
+      "completed_at": null
+    },
+    "d471db13-89a2-4676-b9a2-3a6a35edb448": {
+      "id": "d471db13-89a2-4676-b9a2-3a6a35edb448",
+      "name": "Mobile App",
+      "description": "iOS and Android mobile application",
+      "deadline": null,
+      "category_id": "dec3fb97-1a9d-4a16-89bb-dec9fea6a862",
+      "stages": [
+        {
+          "id": "328eea5c-4871-4c21-b18f-441a8e5e74a8",
+          "name": "Planning",
+          "description": "Stage for Planning",
+          "status": "in_progress",
+          "tasks": [
+            {
+              "id": "ff82f48a-0854-43ae-92a9-ea56a9d87e4f",
+              "name": "Define requirements",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723993",
+              "completed_at": null
+            },
+            {
+              "id": "186cf7ff-56b3-4c61-9950-bb6e6ecccffb",
+              "name": "Create timeline",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723996",
+              "completed_at": null
+            },
+            {
+              "id": "ba4e8952-d680-4317-aa51-57b02495f350",
+              "name": "Assign resources",
+              "description": "Default task for Planning stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.723998",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.723990",
+          "started_at": "2025-08-03T08:51:59.724048",
+          "completed_at": null
+        },
+        {
+          "id": "1bdb59b0-d24e-4716-abc2-f81f943cceac",
+          "name": "Design",
+          "description": "Stage for Design",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "ecaf629b-5d91-4480-b491-c8921f89e71a",
+              "name": "Create wireframes",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724003",
+              "completed_at": null
+            },
+            {
+              "id": "f7e7b705-374c-4723-bd90-920098ed89f8",
+              "name": "Design mockups",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724006",
+              "completed_at": null
+            },
+            {
+              "id": "2f0f1e81-7729-48fc-9141-b4341c627d0c",
+              "name": "Review design",
+              "description": "Default task for Design stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724008",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.724001",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "a1a65855-83db-4597-8880-9c12e872ce2c",
+          "name": "Development",
+          "description": "Stage for Development",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "a2493250-8e42-4ffd-afbb-5de060b7bd4c",
+              "name": "Set up environment",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724013",
+              "completed_at": null
+            },
+            {
+              "id": "98b5dc3e-b940-4c37-9156-ac03b0e33a73",
+              "name": "Implement features",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724015",
+              "completed_at": null
+            },
+            {
+              "id": "f67084f0-2f7b-4767-bc90-bcfb0949bf9d",
+              "name": "Code review",
+              "description": "Default task for Development stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724017",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.724010",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "2578dfcd-64a0-4ebd-b490-f77946aa6301",
+          "name": "Testing",
+          "description": "Stage for Testing",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "3db816a7-c8f3-4f57-98b9-ecdee52715e0",
+              "name": "Write test cases",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724022",
+              "completed_at": null
+            },
+            {
+              "id": "89ff100e-de38-4598-8ca3-b9c64c7b888b",
+              "name": "Execute tests",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724025",
+              "completed_at": null
+            },
+            {
+              "id": "d4643b6a-e2c8-4f1b-97b7-ef2f00370bcb",
+              "name": "Fix bugs",
+              "description": "Default task for Testing stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724027",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.724020",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "e56c3a07-893c-4948-ba3e-49cc76679afd",
+          "name": "Deployment",
+          "description": "Stage for Deployment",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "0d5abee1-8648-424f-8b6c-e83c6585e834",
+              "name": "Deploy to staging",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724032",
+              "completed_at": null
+            },
+            {
+              "id": "f76988e7-53fe-4cf7-a06b-ca1eb6894e70",
+              "name": "User acceptance testing",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724035",
+              "completed_at": null
+            },
+            {
+              "id": "f33900ce-4a84-4c50-a8e8-3ea8308999c7",
+              "name": "Deploy to production",
+              "description": "Default task for Deployment stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724037",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.724030",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "84816077-da5c-447d-85b9-49c5ffc34a8d",
+          "name": "Launch",
+          "description": "Stage for Launch",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "53152f21-12c2-4140-8353-48d06fe2b92c",
+              "name": "Monitor launch",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724042",
+              "completed_at": null
+            },
+            {
+              "id": "2bb635a8-c3c6-4058-a403-78d1f8cf70cb",
+              "name": "Gather feedback",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724045",
+              "completed_at": null
+            },
+            {
+              "id": "687541e5-3cb8-49f5-b090-19d41ab1ba4a",
+              "name": "Create documentation",
+              "description": "Default task for Launch stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T08:51:59.724047",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T08:51:59.724040",
+          "started_at": null,
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-08-03T08:51:59.723986",
+      "completed_at": null
+    }
+  },
+  "categories": {
+    "9d46534a-4493-4188-9045-69936c09b648": {
+      "id": "9d46534a-4493-4188-9045-69936c09b648",
+      "name": "General",
+      "description": "Default category",
+      "color": "#6c757d",
+      "created_at": "2025-08-03T08:51:59.723178"
+    },
+    "dec3fb97-1a9d-4a16-89bb-dec9fea6a862": {
+      "id": "dec3fb97-1a9d-4a16-89bb-dec9fea6a862",
+      "name": "Development",
+      "description": "Software development projects",
+      "color": "#28a745",
+      "created_at": "2025-08-03T08:51:59.723508"
+    }
+  },
+  "templates": {
+    "standard": {
+      "id": "standard",
+      "name": "Standard Software Development",
+      "description": "Traditional software development lifecycle",
+      "stages": [
+        {
+          "name": "Planning",
+          "description": "Project planning and requirement gathering",
+          "tasks": [
+            "Define requirements",
+            "Create timeline",
+            "Assign resources"
+          ]
+        },
+        {
+          "name": "Design",
+          "description": "System and UI design",
+          "tasks": [
+            "Create wireframes",
+            "Design mockups",
+            "Review design"
+          ]
+        },
+        {
+          "name": "Development",
+          "description": "Code implementation",
+          "tasks": [
+            "Set up environment",
+            "Implement features",
+            "Code review"
+          ]
+        },
+        {
+          "name": "Testing",
+          "description": "Quality assurance and testing",
+          "tasks": [
+            "Write test cases",
+            "Execute tests",
+            "Fix bugs"
+          ]
+        },
+        {
+          "name": "Deployment",
+          "description": "Production deployment",
+          "tasks": [
+            "Deploy to staging",
+            "User acceptance testing",
+            "Deploy to production"
+          ]
+        },
+        {
+          "name": "Launch",
+          "description": "Project launch and monitoring",
+          "tasks": [
+            "Monitor launch",
+            "Gather feedback",
+            "Create documentation"
+          ]
+        }
+      ],
+      "created_at": "2025-08-03T08:51:59.723157",
+      "is_default": true
+    },
+    "agile": {
+      "id": "agile",
+      "name": "Agile Sprint",
+      "description": "Single sprint in agile development",
+      "stages": [
+        {
+          "name": "Sprint Planning",
+          "description": "Plan sprint goals and tasks",
+          "tasks": [
+            "Define sprint goals",
+            "Estimate story points",
+            "Create sprint backlog"
+          ]
+        },
+        {
+          "name": "Development",
+          "description": "Sprint development work",
+          "tasks": [
+            "Daily standups",
+            "Develop features",
+            "Update task board"
+          ]
+        },
+        {
+          "name": "Review & Retrospective",
+          "description": "Sprint review and retrospective",
+          "tasks": [
+            "Sprint demo",
+            "Gather feedback",
+            "Retrospective meeting"
+          ]
+        }
+      ],
+      "created_at": "2025-08-03T08:51:59.723164",
+      "is_default": true
+    },
+    "simple": {
+      "id": "simple",
+      "name": "Simple Task",
+      "description": "Basic task template with minimal stages",
+      "stages": [
+        {
+          "name": "To Do",
+          "description": "Tasks to be completed",
+          "tasks": [
+            "Complete main task"
+          ]
+        },
+        {
+          "name": "In Progress",
+          "description": "Tasks currently being worked on",
+          "tasks": [
+            "Work on task"
+          ]
+        },
+        {
+          "name": "Done",
+          "description": "Completed tasks",
+          "tasks": [
+            "Review completion"
+          ]
+        }
+      ],
+      "created_at": "2025-08-03T08:51:59.723165",
+      "is_default": true
+    }
+  },
+  "default_category_id": "9d46534a-4493-4188-9045-69936c09b648"
+}

@@ -20,10 +20,14 @@ app = Flask(__name__)
 _pm_instance = None
 _last_file_mtime = 0
 _data_file = "projects.json"
+_current_project_file = "projects.json"
 
 def get_project_manager():
     """Get ProjectManager instance with automatic data reloading"""
-    global _pm_instance, _last_file_mtime, _data_file
+    global _pm_instance, _last_file_mtime, _data_file, _current_project_file
+    
+    # Update data file to current project file
+    _data_file = _current_project_file
     
     try:
         # Check if file exists and get modification time
@@ -45,6 +49,13 @@ def get_project_manager():
     
     return _pm_instance
 
+def switch_project_file(new_file):
+    """Switch to a different project file"""
+    global _pm_instance, _last_file_mtime, _current_project_file
+    _current_project_file = new_file
+    _pm_instance = None  # Force reload
+    _last_file_mtime = 0
+
 @app.route('/')
 def dashboard():
     try:
@@ -58,7 +69,7 @@ def dashboard():
             category.project_count = len([p for p in projects if p.category_id == category.id])
         
         logging.info(f"Dashboard: {len(projects)} projects, {len(categories)} categories")
-        return render_template('dashboard.html', projects=projects, categories=categories, summary=summary)
+        return render_template('dashboard.html', projects=projects, categories=categories, summary=summary, current_file=_current_project_file)
     except Exception as e:
         logging.error(f"Error rendering dashboard: {e}")
         return "Error loading dashboard", 500
@@ -812,6 +823,199 @@ def check_deadlines_background():
             )
         except:
             pass
+
+# Project File Management APIs
+@app.route('/api/project-files')
+def api_project_files():
+    try:
+        import glob
+        
+        # Find all JSON files in current directory
+        json_files = glob.glob("*.json")
+        files_info = []
+        
+        for file_name in json_files:
+            try:
+                # Try to load and count projects
+                temp_pm = ProjectManager(file_name)
+                project_count = len(temp_pm.list_projects())
+                
+                files_info.append({
+                    'name': file_name,
+                    'projects': project_count,
+                    'is_current': file_name == _current_project_file,
+                    'size': os.path.getsize(file_name) if os.path.exists(file_name) else 0
+                })
+            except Exception as e:
+                # If file is corrupted or not a valid project file, still show it but with 0 projects
+                files_info.append({
+                    'name': file_name,
+                    'projects': 0,
+                    'is_current': file_name == _current_project_file,
+                    'size': os.path.getsize(file_name) if os.path.exists(file_name) else 0,
+                    'error': str(e)
+                })
+        
+        # Sort by current file first, then alphabetically
+        files_info.sort(key=lambda x: (not x['is_current'], x['name']))
+        
+        return jsonify({'files': files_info})
+    except Exception as e:
+        logging.error(f"Error listing project files: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/switch-project-file', methods=['POST'])
+def api_switch_project_file():
+    try:
+        data = request.json
+        file_name = data.get('file_name')
+        
+        if not file_name:
+            return jsonify({'error': 'File name is required'}), 400
+        
+        if not os.path.exists(file_name):
+            return jsonify({'error': 'File does not exist'}), 404
+        
+        # Test if the file is a valid project file
+        try:
+            ProjectManager(file_name)
+        except Exception as e:
+            return jsonify({'error': f'Invalid project file: {str(e)}'}), 400
+        
+        switch_project_file(file_name)
+        return jsonify({'success': True, 'current_file': file_name})
+        
+    except Exception as e:
+        logging.error(f"Error switching project file: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/create-project-file', methods=['POST'])
+def api_create_project_file():
+    try:
+        data = request.json
+        file_name = data.get('file_name', '').strip()
+        description = data.get('description', '')
+        initialize_with = data.get('initialize_with', 'empty')
+        
+        if not file_name:
+            return jsonify({'error': 'File name is required'}), 400
+        
+        # Add .json extension if not present
+        if not file_name.endswith('.json'):
+            file_name += '.json'
+        
+        # Check if file already exists
+        if os.path.exists(file_name):
+            return jsonify({'error': 'File already exists'}), 400
+        
+        # Create new project file based on initialization option
+        if initialize_with == 'copy':
+            # Copy current file
+            import shutil
+            shutil.copy(_current_project_file, file_name)
+        elif initialize_with == 'sample':
+            # Create with sample data
+            new_pm = ProjectManager(file_name)
+            
+            # Create sample category
+            category = new_pm.create_category("Sample Category", description or "Sample category for demo", "#007bff")
+            
+            # Create sample project
+            project = new_pm.create_project(
+                "Sample Project",
+                "This is a sample project to demonstrate the system",
+                deadline=None,
+                category_id=category.id
+            )
+            new_pm.save_data()
+        else:
+            # Create empty file
+            new_pm = ProjectManager(file_name)
+            new_pm.save_data()
+        
+        return jsonify({'success': True, 'file_name': file_name})
+        
+    except Exception as e:
+        logging.error(f"Error creating project file: {e}")
+        return jsonify({'error': f'Failed to create file: {str(e)}'}), 500
+
+@app.route('/api/import-project-file', methods=['POST'])
+def api_import_project_file():
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file uploaded'}), 400
+        
+        file = request.files['file']
+        file_name = request.form.get('file_name', '').strip()
+        switch_to_imported = request.form.get('switch_to_imported', 'false').lower() == 'true'
+        
+        if not file_name:
+            return jsonify({'error': 'File name is required'}), 400
+        
+        # Add .json extension if not present
+        if not file_name.endswith('.json'):
+            file_name += '.json'
+        
+        # Check if file already exists
+        if os.path.exists(file_name):
+            return jsonify({'error': 'File already exists'}), 400
+        
+        # Save uploaded file
+        file.save(file_name)
+        
+        # Validate that it's a proper project file
+        try:
+            ProjectManager(file_name)
+        except Exception as e:
+            os.remove(file_name)  # Clean up invalid file
+            return jsonify({'error': f'Invalid project file: {str(e)}'}), 400
+        
+        # Switch to imported file if requested
+        if switch_to_imported:
+            switch_project_file(file_name)
+        
+        return jsonify({'success': True, 'file_name': file_name})
+        
+    except Exception as e:
+        logging.error(f"Error importing project file: {e}")
+        return jsonify({'error': f'Failed to import file: {str(e)}'}), 500
+
+@app.route('/api/export-project-file', methods=['POST'])
+def api_export_project_file():
+    try:
+        data = request.json
+        file_name = data.get('file_name', _current_project_file)
+        
+        if not os.path.exists(file_name):
+            return jsonify({'error': 'File does not exist'}), 404
+        
+        return send_file(file_name, as_attachment=True, download_name=file_name)
+        
+    except Exception as e:
+        logging.error(f"Error exporting project file: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/delete-project-file', methods=['DELETE'])
+def api_delete_project_file():
+    try:
+        data = request.json
+        file_name = data.get('file_name')
+        
+        if not file_name:
+            return jsonify({'error': 'File name is required'}), 400
+        
+        if file_name == _current_project_file:
+            return jsonify({'error': 'Cannot delete the currently active file'}), 400
+        
+        if not os.path.exists(file_name):
+            return jsonify({'error': 'File does not exist'}), 404
+        
+        os.remove(file_name)
+        return jsonify({'success': True})
+        
+    except Exception as e:
+        logging.error(f"Error deleting project file: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
 
 if __name__ == '__main__':
     print("🌐 Starting Project Management Web Interface with Auto-Reload")
