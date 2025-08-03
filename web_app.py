@@ -3,8 +3,9 @@
 Web interface for Project Management System
 With automatic data reloading for real-time updates
 """
-from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for, send_file
 from project_manager import ProjectManager, Task, TaskStatus, StageStatus
+from notification_system import get_notification_system
 import json
 import logging
 import os
@@ -45,15 +46,33 @@ def get_project_manager():
     return _pm_instance
 
 @app.route('/')
-def index():
+def dashboard():
     try:
         pm = get_project_manager()  # Get fresh data
         projects = pm.list_projects()
         categories = pm.list_categories()
-        logging.info(f"Index page: {len(projects)} projects, {len(categories)} categories")
+        summary = pm.get_global_summary()
+        
+        # Add project count to categories
+        for category in categories:
+            category.project_count = len([p for p in projects if p.category_id == category.id])
+        
+        logging.info(f"Dashboard: {len(projects)} projects, {len(categories)} categories")
+        return render_template('dashboard.html', projects=projects, categories=categories, summary=summary)
+    except Exception as e:
+        logging.error(f"Error rendering dashboard: {e}")
+        return "Error loading dashboard", 500
+
+@app.route('/projects')
+def projects():
+    try:
+        pm = get_project_manager()  # Get fresh data
+        projects = pm.list_projects()
+        categories = pm.list_categories()
+        logging.info(f"Projects page: {len(projects)} projects, {len(categories)} categories")
         return render_template('index.html', projects=projects, categories=categories)
     except Exception as e:
-        logging.error(f"Error rendering index page: {e}")
+        logging.error(f"Error rendering projects page: {e}")
         return "Error loading page", 500
 
 @app.route('/summary')
@@ -674,6 +693,125 @@ def api_batch_move_category():
     except Exception as e:
         logging.error(f"Error in batch move category: {e}")
         return jsonify({'error': 'Internal Server Error'}), 500
+
+# Notification System APIs
+@app.route('/api/notification-settings', methods=['GET', 'POST'])
+def api_notification_settings():
+    try:
+        notification_system = get_notification_system()
+        
+        if request.method == 'POST':
+            settings = request.json
+            success = notification_system.update_settings(settings)
+            return jsonify({'success': success})
+        else:
+            # Return current settings
+            config = notification_system.config
+            return jsonify({
+                'email': config['email']['address'],
+                'phone': config['sms']['phone'],
+                'emailEnabled': config['email']['enabled'],
+                'smsEnabled': config['sms']['enabled'],
+                'notifyDeadlines': config['preferences']['notify_deadlines'],
+                'notifyCompletion': config['preferences']['notify_completion'],
+                'notifyErrors': config['preferences']['notify_errors']
+            })
+    except Exception as e:
+        logging.error(f"Error in notification settings API: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/test-notifications', methods=['POST'])
+def api_test_notifications():
+    try:
+        notification_system = get_notification_system()
+        results = notification_system.test_notifications()
+        return jsonify(results)
+    except Exception as e:
+        logging.error(f"Error testing notifications: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/system-status')
+def api_system_status():
+    try:
+        notification_system = get_notification_system()
+        pm = get_project_manager()
+        
+        # Check system health
+        status = {
+            'web_interface': True,
+            'data_persistence': os.path.exists(_data_file),
+            'auto_reload': True,
+            'notifications_configured': (
+                notification_system.config['email']['enabled'] or 
+                notification_system.config['sms']['enabled']
+            ),
+            'total_projects': len(pm.list_projects()),
+            'timestamp': datetime.now().isoformat()
+        }
+        return jsonify(status)
+    except Exception as e:
+        logging.error(f"Error checking system status: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/api/recent-activity')
+def api_recent_activity():
+    try:
+        pm = get_project_manager()
+        projects = pm.list_projects()
+        
+        activities = []
+        
+        # Get recent project activities
+        for project in projects[-5:]:  # Last 5 projects
+            activities.append({
+                'title': f'Project Created: {project.name}',
+                'description': f'New project added to {project.category_id or "Uncategorized"}',
+                'time': project.created_at if hasattr(project, 'created_at') else 'Recently',
+                'icon': 'fas fa-plus',
+                'color': '#10b981'
+            })
+        
+        # Add some system activities
+        activities.insert(0, {
+            'title': 'Dashboard Loaded',
+            'description': f'Viewing {len(projects)} projects across {len(pm.list_categories())} categories',
+            'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'icon': 'fas fa-tachometer-alt',
+            'color': '#4f46e5'
+        })
+        
+        return jsonify({'activities': activities[-10:]})  # Return last 10 activities
+    except Exception as e:
+        logging.error(f"Error getting recent activity: {e}")
+        return jsonify({'error': 'Internal Server Error'}), 500
+
+@app.route('/USER_GUIDE.md')
+def user_guide():
+    try:
+        return send_file('USER_GUIDE.md', as_attachment=False, mimetype='text/plain')
+    except Exception as e:
+        logging.error(f"Error serving user guide: {e}")
+        return "User guide not found", 404
+
+# Background deadline checker (runs periodically)
+def check_deadlines_background():
+    try:
+        pm = get_project_manager()
+        notification_system = get_notification_system()
+        projects = pm.list_projects()
+        notification_system.check_deadlines(projects)
+    except Exception as e:
+        logging.error(f"Error checking deadlines: {e}")
+        # Send error notification
+        try:
+            notification_system = get_notification_system()
+            notification_system.notify_system_error(
+                "Deadline Check Error",
+                str(e),
+                datetime.now().isoformat()
+            )
+        except:
+            pass
 
 if __name__ == '__main__':
     print("🌐 Starting Project Management Web Interface with Auto-Reload")
