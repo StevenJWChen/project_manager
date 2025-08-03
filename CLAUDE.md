@@ -6,6 +6,41 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a comprehensive project management system built in Python with both CLI and web interfaces. It manages projects through stages with tasks, includes category organization, deadline tracking, and progress monitoring.
 
+## Documentation
+
+### User Documentation
+- **USER_GUIDE.md**: Complete user guide with step-by-step instructions
+- **README.md**: Quick start and overview
+- **CLAUDE.md**: Developer guidance for Claude Code
+
+### Key Features
+- Multi-stage project management with automatic progression
+- Web interface with real-time updates and batch operations
+- CLI interface for command-line users
+- Category organization with color coding
+- Project templates for standardized workflows
+- Data persistence with automatic saving
+- Secure git integration with SSH authentication
+
+## Git Commands
+
+### Automated Commit & Push
+```bash
+./auto_commit.sh
+```
+This script will automatically:
+- Add all changes
+- Create timestamped commit message
+- Push to GitHub using SSH authentication
+- Show status and results
+
+### Manual Git Operations
+```bash
+git add .
+git commit -m "Your commit message"
+git push origin main
+```
+
 ## Common Development Commands
 
 ### Running the Application
