@@ -1,0 +1,516 @@
+{
+  "projects": {
+    "rc-001": {
+      "id": "rc-001",
+      "name": "28nm Mobile SoC Development",
+      "description": "28nm technology node RC file development for mobile application processors targeting 5G and AI workloads",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "stage-1",
+          "name": "Customer Request",
+          "description": "Initial customer requirements gathering and specification review",
+          "status": "completed",
+          "tasks": [
+            {
+              "id": "task-1-1",
+              "name": "Requirements analysis",
+              "description": "Analyze customer technical specifications and performance targets",
+              "assignee": "System Architect",
+              "status": "completed",
+              "created_at": "2025-01-15T09:00:00.000Z",
+              "completed_at": "2025-01-16T17:30:00.000Z"
+            }
+          ],
+          "created_at": "2025-01-15T09:00:00.000Z",
+          "started_at": "2025-01-15T09:00:00.000Z",
+          "completed_at": "2025-01-18T09:45:00.000Z"
+        },
+        {
+          "id": "stage-2",
+          "name": "SPICE Model Ready",
+          "description": "SPICE model development and validation for 28nm process",
+          "status": "completed",
+          "tasks": [],
+          "created_at": "2025-01-18T10:00:00.000Z",
+          "started_at": "2025-01-18T10:00:00.000Z",
+          "completed_at": "2025-02-08T17:00:00.000Z"
+        },
+        {
+          "id": "stage-3",
+          "name": "Tech File Generation",
+          "description": "Generate RC technology file for EDA tools integration",
+          "status": "in_progress",
+          "tasks": [],
+          "created_at": "2025-02-08T09:00:00.000Z",
+          "started_at": "2025-02-08T09:00:00.000Z",
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-01-15T09:00:00.000Z",
+      "completed_at": null
+    },
+    "rc-002": {
+      "id": "rc-002",
+      "name": "7nm Automotive MCU Development",
+      "description": "Advanced 7nm automotive microcontroller RC technology file for safety-critical applications",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "stage-1",
+          "name": "Customer Request",
+          "description": "Initial customer requirements gathering and specification review",
+          "status": "completed",
+          "tasks": [],
+          "created_at": "2025-01-10T08:00:00.000Z",
+          "started_at": "2025-01-10T08:00:00.000Z",
+          "completed_at": "2025-01-16T12:00:00.000Z"
+        },
+        {
+          "id": "stage-5",
+          "name": "Tool Installation",
+          "description": "Deploy automotive-qualified technology file to customer environment",
+          "status": "in_progress",
+          "tasks": [],
+          "created_at": "2025-04-12T09:00:00.000Z",
+          "started_at": "2025-04-12T09:00:00.000Z",
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-01-10T08:00:00.000Z",
+      "completed_at": null
+    },
+    "rc-003": {
+      "id": "rc-003",
+      "name": "5nm 5G RF Technology",
+      "description": "5nm RF technology file for 5G mmWave front-end modules with advanced parasitic modeling",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "stage-7",
+          "name": "Release",
+          "description": "5G RF technology file release and customer delivery",
+          "status": "completed",
+          "tasks": [],
+          "created_at": "2025-07-08T09:00:00.000Z",
+          "started_at": "2025-07-08T09:00:00.000Z",
+          "completed_at": "2025-07-18T17:00:00.000Z"
+        }
+      ],
+      "created_at": "2025-02-01T09:00:00.000Z",
+      "completed_at": "2025-07-18T17:00:00.000Z"
+    },
+    "rc-004": {
+      "id": "rc-004",
+      "name": "3nm AI Accelerator Technology",
+      "description": "Advanced 3nm RC technology file for AI/ML accelerator chips with dense interconnect modeling",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "stage-3",
+          "name": "Tech File Generation",
+          "description": "Dense interconnect RC technology file for AI accelerator chips",
+          "status": "in_progress",
+          "tasks": [],
+          "created_at": "2025-05-30T09:00:00.000Z",
+          "started_at": "2025-05-30T09:00:00.000Z",
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-04-01T09:00:00.000Z",
+      "completed_at": null
+    },
+    "rc-005": {
+      "id": "rc-005",
+      "name": "14nm IoT Sensor Technology",
+      "description": "Ultra-low power 14nm RC technology file for IoT sensor applications with power optimization",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "stage-3",
+          "name": "Tech File Generation",
+          "description": "Power-optimized RC technology file for IoT applications",
+          "status": "in_progress",
+          "tasks": [],
+          "created_at": "2025-04-18T09:00:00.000Z",
+          "started_at": "2025-04-18T09:00:00.000Z",
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-03-01T09:00:00.000Z",
+      "completed_at": null
+    },
+    "642f346d-57c5-4fa5-959f-9d553b958246": {
+      "id": "642f346d-57c5-4fa5-959f-9d553b958246",
+      "name": "my cat",
+      "description": "",
+      "deadline": null,
+      "category_id": "rc-semiconductor",
+      "stages": [
+        {
+          "id": "368b2a46-da7d-4894-a8a9-24cc5cfbb656",
+          "name": "Customer Request",
+          "description": "Initial customer requirements gathering and specification review",
+          "status": "completed",
+          "tasks": [
+            {
+              "id": "c866da55-4e63-49d4-b412-4b7584cd51c5",
+              "name": "Requirements analysis",
+              "description": "Default task for Customer Request stage",
+              "assignee": "",
+              "status": "completed",
+              "created_at": "2025-08-03T14:21:00.593674",
+              "completed_at": "2025-08-03T14:21:13.439296"
+            },
+            {
+              "id": "a47f24fa-c0fd-47da-87a8-3b05cfd36458",
+              "name": "Technology node selection",
+              "description": "Default task for Customer Request stage",
+              "assignee": "",
+              "status": "completed",
+              "created_at": "2025-08-03T14:21:00.593682",
+              "completed_at": "2025-08-03T14:21:16.171664"
+            },
+            {
+              "id": "de45d677-8825-4265-94ad-7b50f553b418",
+              "name": "Project kickoff",
+              "description": "Default task for Customer Request stage",
+              "assignee": "",
+              "status": "completed",
+              "created_at": "2025-08-03T14:21:00.593689",
+              "completed_at": "2025-08-03T14:21:14.722713"
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593663",
+          "started_at": "2025-08-03T14:21:00.593944",
+          "completed_at": "2025-08-03T14:21:16.171693"
+        },
+        {
+          "id": "7c7a177d-76a5-4c96-8888-dbd9c2756fb1",
+          "name": "SPICE Model Ready",
+          "description": "SPICE model development and validation",
+          "status": "in_progress",
+          "tasks": [
+            {
+              "id": "7ef791b0-87f9-4b4b-ad1c-ab258ff7898d",
+              "name": "Device characterization",
+              "description": "Default task for SPICE Model Ready stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593705",
+              "completed_at": null
+            },
+            {
+              "id": "924dc686-dea0-491c-b89f-52287a8d71d2",
+              "name": "SPICE model generation",
+              "description": "Default task for SPICE Model Ready stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593711",
+              "completed_at": null
+            },
+            {
+              "id": "c9220666-18c1-4d26-b7da-48b2f379ecff",
+              "name": "Model validation",
+              "description": "Default task for SPICE Model Ready stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593717",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593697",
+          "started_at": "2025-08-03T14:21:16.171707",
+          "completed_at": null
+        },
+        {
+          "id": "a0b811b8-80e8-49c4-aad6-8c2531c9cfa7",
+          "name": "Tech File Generation",
+          "description": "RC technology file generation and compilation",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "2031d6b2-2b06-4e1d-b255-b14824241972",
+              "name": "Layer stack definition",
+              "description": "Default task for Tech File Generation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593732",
+              "completed_at": null
+            },
+            {
+              "id": "e7143901-7fd6-484b-b499-b712d3c7acb0",
+              "name": "RC extraction rules",
+              "description": "Default task for Tech File Generation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593738",
+              "completed_at": null
+            },
+            {
+              "id": "9dfda13e-1ea6-4d88-921d-bb1318c11b48",
+              "name": "Technology file compilation",
+              "description": "Default task for Tech File Generation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593744",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593725",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "90c88ec8-c89f-41d5-ad33-054633b5f95c",
+          "name": "Tool Qualification",
+          "description": "EDA tool qualification and integration testing",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "3b74e34f-d3b4-4e5a-b6ef-91bce202f0b1",
+              "name": "EDA tool integration",
+              "description": "Default task for Tool Qualification stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593759",
+              "completed_at": null
+            },
+            {
+              "id": "3deafc06-029f-47e9-a558-de88d97eff09",
+              "name": "Extraction validation",
+              "description": "Default task for Tool Qualification stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593766",
+              "completed_at": null
+            },
+            {
+              "id": "37be18f7-55ea-4263-ba8a-1bd53d7f4f70",
+              "name": "Qualification test suite",
+              "description": "Default task for Tool Qualification stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593773",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593750",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "82e2776e-a641-4dde-b359-80a43b3f158e",
+          "name": "Tool Installation",
+          "description": "Customer deployment and installation support",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "c720355a-a3fd-4466-9475-2bb2c848ab33",
+              "name": "Package preparation",
+              "description": "Default task for Tool Installation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593787",
+              "completed_at": null
+            },
+            {
+              "id": "6e93fa90-125b-431a-9be6-76186ecc6387",
+              "name": "Installation documentation",
+              "description": "Default task for Tool Installation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593802",
+              "completed_at": null
+            },
+            {
+              "id": "68b07ed0-41e0-422e-9bf2-98bf97da486a",
+              "name": "Customer deployment support",
+              "description": "Default task for Tool Installation stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593816",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593780",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "76e8f2cd-2623-4f54-bcc1-9fbf26428b29",
+          "name": "QC",
+          "description": "Quality control and final validation",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "33b72cd3-b8d0-49cb-8507-52d0f44f7ee2",
+              "name": "Accuracy verification",
+              "description": "Default task for QC stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593847",
+              "completed_at": null
+            },
+            {
+              "id": "22d5fdb8-560c-4f23-a774-b34cf6c5430a",
+              "name": "Performance benchmarking",
+              "description": "Default task for QC stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593862",
+              "completed_at": null
+            },
+            {
+              "id": "fba672d7-f6ae-48cf-b97f-ac5384a9f189",
+              "name": "Quality sign-off",
+              "description": "Default task for QC stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593877",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593832",
+          "started_at": null,
+          "completed_at": null
+        },
+        {
+          "id": "b5c4d7fc-f29a-4028-a0df-5e08fca13ae0",
+          "name": "Release",
+          "description": "Final release and customer delivery",
+          "status": "not_started",
+          "tasks": [
+            {
+              "id": "3a950278-a915-4d4f-9a1b-963ffb7ab44c",
+              "name": "Release package finalization",
+              "description": "Default task for Release stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593906",
+              "completed_at": null
+            },
+            {
+              "id": "f8e886a0-1bc0-4493-8929-746357227353",
+              "name": "Customer delivery",
+              "description": "Default task for Release stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593920",
+              "completed_at": null
+            },
+            {
+              "id": "d756fd7b-a591-4e0e-8694-d78ef43624fa",
+              "name": "Project closure",
+              "description": "Default task for Release stage",
+              "assignee": "",
+              "status": "todo",
+              "created_at": "2025-08-03T14:21:00.593934",
+              "completed_at": null
+            }
+          ],
+          "created_at": "2025-08-03T14:21:00.593891",
+          "started_at": null,
+          "completed_at": null
+        }
+      ],
+      "created_at": "2025-08-03T14:21:00.593636",
+      "completed_at": null
+    }
+  },
+  "categories": {
+    "rc-semiconductor": {
+      "id": "rc-semiconductor",
+      "name": "RC Semiconductor Technology",
+      "description": "RC technology file development for various semiconductor applications and technology nodes",
+      "color": "#8b5cf6",
+      "created_at": "2025-01-01T08:00:00.000Z"
+    }
+  },
+  "templates": {
+    "rc-tech-template": {
+      "id": "rc-tech-template",
+      "name": "RC Technology Development",
+      "description": "Standard RC technology file development workflow from customer request to release",
+      "stages": [
+        {
+          "name": "Customer Request",
+          "description": "Initial customer requirements gathering and specification review",
+          "tasks": [
+            "Requirements analysis",
+            "Technology node selection",
+            "Project kickoff"
+          ]
+        },
+        {
+          "name": "SPICE Model Ready",
+          "description": "SPICE model development and validation",
+          "tasks": [
+            "Device characterization",
+            "SPICE model generation",
+            "Model validation"
+          ]
+        },
+        {
+          "name": "Tech File Generation",
+          "description": "RC technology file generation and compilation",
+          "tasks": [
+            "Layer stack definition",
+            "RC extraction rules",
+            "Technology file compilation"
+          ]
+        },
+        {
+          "name": "Tool Qualification",
+          "description": "EDA tool qualification and integration testing",
+          "tasks": [
+            "EDA tool integration",
+            "Extraction validation",
+            "Qualification test suite"
+          ]
+        },
+        {
+          "name": "Tool Installation",
+          "description": "Customer deployment and installation support",
+          "tasks": [
+            "Package preparation",
+            "Installation documentation",
+            "Customer deployment support"
+          ]
+        },
+        {
+          "name": "QC",
+          "description": "Quality control and final validation",
+          "tasks": [
+            "Accuracy verification",
+            "Performance benchmarking",
+            "Quality sign-off"
+          ]
+        },
+        {
+          "name": "Release",
+          "description": "Final release and customer delivery",
+          "tasks": [
+            "Release package finalization",
+            "Customer delivery",
+            "Project closure"
+          ]
+        }
+      ],
+      "created_at": "2025-01-01T08:00:00.000Z",
+      "is_default": false
+    }
+  },
+  "default_category_id": "rc-semiconductor",
+  "metadata": {
+    "subtitle": "RC Technology File Development - Advanced Semiconductor Solutions",
+    "description": "Comprehensive RC technology file development projects spanning multiple semiconductor technology nodes and specialized applications including mobile, automotive, 5G, AI, and IoT solutions.",
+    "created_at": "2025-01-01T08:00:00.000Z",
+    "last_modified": "2025-08-03T14:00:00.000Z"
+  }
+}

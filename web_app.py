@@ -36,9 +36,17 @@ def get_project_manager():
         else:
             current_mtime = 0
         
-        # Create new instance or reload if file changed
-        if _pm_instance is None or current_mtime > _last_file_mtime:
-            logging.info(f"Reloading project data from {_data_file}")
+        # Create new instance or reload if file changed AND we don't have an instance
+        # OR if the file was modified by external process (significant time difference)
+        should_reload = False
+        if _pm_instance is None:
+            should_reload = True
+            logging.info(f"Creating initial ProjectManager instance for {_data_file}")
+        elif current_mtime > _last_file_mtime + 2:  # Only reload if file was modified more than 2 seconds ago
+            should_reload = True
+            logging.info(f"Reloading project data from {_data_file} (external modification detected)")
+        
+        if should_reload:
             _pm_instance = ProjectManager(_data_file)
             _last_file_mtime = current_mtime
             
@@ -55,6 +63,14 @@ def switch_project_file(new_file):
     _current_project_file = new_file
     _pm_instance = None  # Force reload
     _last_file_mtime = 0
+
+def get_template_context():
+    """Get common template context including subtitle"""
+    pm = get_project_manager()
+    return {
+        'subtitle': pm.get_subtitle(),
+        'current_file': _current_project_file
+    }
 
 @app.route('/')
 def dashboard():
@@ -80,8 +96,9 @@ def index():
         pm = get_project_manager()  # Get fresh data
         projects = pm.list_projects()
         categories = pm.list_categories()
+        context = get_template_context()
         logging.info(f"Projects page: {len(projects)} projects, {len(categories)} categories")
-        return render_template('index.html', projects=projects, categories=categories)
+        return render_template('index.html', projects=projects, categories=categories, **context)
     except Exception as e:
         logging.error(f"Error rendering projects page: {e}")
         return "Error loading page", 500
@@ -109,9 +126,10 @@ def summary():
                 
             projects_summary.append(summary_data)
         
+        context = get_template_context()
         logging.info(f"Summary page: {global_summary['total_projects']} total projects")
         logging.info(f"Projects Summary: {len(projects_summary)} projects")
-        return render_template('summary.html', summary=global_summary, projects=projects_summary)
+        return render_template('summary.html', summary=global_summary, projects=projects_summary, **context)
     except Exception as e:
         logging.error(f"Error rendering summary page: {e}")
         return "Error loading summary page", 500

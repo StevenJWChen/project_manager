@@ -7,6 +7,18 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+    <style>
+        .page-subtitle {
+            background: linear-gradient(135deg, #4f46e5, #10b981);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin: -5px 0 15px 0;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -35,6 +47,9 @@
     </nav>
 
     <div class="container mt-4">
+        {% if subtitle %}
+        <div class="page-subtitle">{{ subtitle }}</div>
+        {% endif %}
         {% block content %}{% endblock %}
     </div>
 

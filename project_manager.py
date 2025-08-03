@@ -393,12 +393,17 @@ class ProjectManager:
         return self.get_category(self.default_category_id) if self.default_category_id else None
 
     def _ensure_default_category(self):
+        needs_save = False
         if not self.categories:
             default_cat = self.create_category("General", "Default category", "#6c757d")
             self.default_category_id = default_cat.id
+            needs_save = True
         elif not self.default_category_id or not self.get_category(self.default_category_id):
             self.default_category_id = next(iter(self.categories.keys()), None)
-        self.save_data()
+            needs_save = True
+        
+        if needs_save:
+            self.save_data()
 
     def get_projects_by_category(self, category_id: str) -> List[Project]:
         return [p for p in self.list_projects() if p.category_id == category_id]
@@ -452,7 +457,16 @@ class ProjectManager:
 
         try:
             with open(self.data_file, 'r') as f:
-                data = json.load(f)
+                content = f.read().strip()
+                if not content:
+                    # File exists but is empty - don't overwrite, just initialize
+                    print(f"Warning: {self.data_file} is empty. Initializing with defaults but not saving.")
+                    self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None
+                    self.metadata = self._get_default_metadata()
+                    self._create_default_templates()
+                    return
+                
+                data = json.loads(content)
                 self.projects = {pid: Project.from_dict(p_data) for pid, p_data in data.get('projects', {}).items()}
                 self.categories = {cid: Category.from_dict(c_data) for cid, c_data in data.get('categories', {}).items()}
                 self.templates = data.get('templates', {})
@@ -468,10 +482,13 @@ class ProjectManager:
                 if not self.templates:
                     self._create_default_templates()
         except (json.JSONDecodeError, KeyError, TypeError) as e:
-            print(f"Warning: Could not load or parse {self.data_file}. Starting fresh. Error: {e}")
-            self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None
-            self.metadata = self._get_default_metadata()
-            self._create_default_templates()
+            print(f"Warning: Could not load or parse {self.data_file}. Error: {e}")
+            # Don't automatically overwrite - preserve existing instance data if we have it
+            if not hasattr(self, 'projects') or self.projects is None:
+                print(f"Initializing fresh data for {self.data_file}")
+                self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None
+                self.metadata = self._get_default_metadata()
+                self._create_default_templates()
 
     def _get_default_metadata(self):
         """Get default metadata structure"""
