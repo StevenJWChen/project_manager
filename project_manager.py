@@ -448,6 +448,10 @@ class ProjectManager:
         except IOError as e:
             print(f"Error saving data to {self.data_file}: {e}")
 
+    def save_projects(self):
+        """Alias for save_data() for backward compatibility"""
+        self.save_data()
+
     def load_data(self):
         if not os.path.exists(self.data_file):
             self.projects, self.categories, self.templates, self.default_category_id = {}, {}, {}, None

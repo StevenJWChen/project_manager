@@ -28,7 +28,17 @@
       "Bash(timeout:*)",
       "Bash(open:*)",
       "Bash(ls:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(find:*)",
+      "Bash(npm install)",
+      "Bash(node server.js)",
+      "Bash(node:*)",
+      "Bash(git init:*)",
+      "Bash(./deploy.sh)",
+      "Bash(./docker-build.sh:*)",
+      "Bash(./deploy-to-synology.sh:*)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

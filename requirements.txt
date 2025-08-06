@@ -1,0 +1,52 @@
+# Project Manager Application - Python Dependencies
+# For closed network deployment
+
+# Web framework
+flask==2.3.3
+werkzeug==2.3.7
+
+# Date/time handling (built-in datetime module used, no external deps needed)
+
+# JSON handling (built-in json module used)
+
+# UUID generation (built-in uuid module used)
+
+# System/OS utilities (built-in os, sys modules used)
+
+# Process management (built-in subprocess module used)
+
+# Threading (built-in threading module used)
+
+# Logging (built-in logging module used)
+
+# Type hints (built-in typing module used)
+
+# Standard library dependencies (no pip install needed):
+# - json
+# - os
+# - sys
+# - datetime
+# - enum
+# - typing
+# - uuid
+# - subprocess
+# - time
+# - webbrowser
+# - threading
+# - signal
+# - logging
+# - glob
+# - shutil
+
+# Optional: For enhanced email notifications (if notification_system.py is used)
+# These are NOT required for core functionality and can be omitted for high-security deployments:
+# requests==2.31.0 (only needed for SMS notifications via external services)
+# Note: smtplib and email modules are part of Python standard library
+
+# HIGH-SECURITY NOTE: 
+# The application works completely offline without any external network dependencies.
+# Email notifications use local SMTP (no external services).
+# SMS notifications are disabled by default (require external service).
+
+# Installation command for closed network:
+# pip install -r requirements.txt --no-index --find-links /path/to/offline/packages
